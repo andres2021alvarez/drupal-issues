@@ -73,12 +73,12 @@ class PathautoEntityWithStringIdTest extends KernelTestBase {
   /**
    * Test aliasing entities with long string ID.
    *
-   * @dataProvider entityWithStringIdProvider
-   *
    * @param string|int $id
-   *   The entity ID
+   *   The entity ID.
    * @param string $expected_key
    *   The expected key for 'pathauto_state.*' collections.
+   *
+   * @dataProvider entityWithStringIdProvider
    */
   public function testEntityWithStringId($id, $expected_key) {
     $entity = PathautoStringIdTest::create([

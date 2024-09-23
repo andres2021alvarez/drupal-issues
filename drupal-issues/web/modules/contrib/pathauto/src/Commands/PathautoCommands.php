@@ -62,9 +62,7 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
-   * (Re)generate URL aliases.
-   *
-   * @command pathauto:aliases-generate
+   * Creates or updates an alias for the given entity.
    *
    * @param string $action
    *   The action to take. Possible actions are "create" (generate aliases for
@@ -75,6 +73,8 @@ class PathautoCommands extends DrushCommands {
    *   aliases for all types.
    *
    * @throws \Exception
+   *
+   *  @command pathauto:aliases-generate
    *
    * @usage drush pathauto:aliases-generate all all
    *   Generate all URL aliases.
@@ -105,18 +105,17 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
-   * Delete URL aliases
-   *
-   * @command pathauto:aliases-delete
+   * Delete URL aliases.
    *
    * @param array $types
    *   Comma-separated list of alias types to delete. Pass "all" to delete
    *   aliases for all types.
-   *
-   * @option purge
+   * @param array $options
    *   Deletes all URL aliases, including manually created ones.
    *
    * @throws \Exception
+   *
+   * @command pathauto:aliases-delete
    *
    * @usage drush pathauto:aliases-delete canonical_entities:node
    *   Delete all automatically generated URL aliases for node entities,
@@ -168,6 +167,8 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
+   * Interact Generate Aliases.
+   *
    * @hook interact pathauto:aliases-generate
    *
    * @throws \Drush\Exceptions\UserAbortException
@@ -181,6 +182,8 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
+   * Interact Alias Types.
+   *
    * @hook interact
    */
   public function interactAliasTypes(Input $input, Output $output) {
@@ -195,10 +198,12 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
+   * Validate Generate Aliases.
+   *
    * @hook validate pathauto:aliases-generate
    *
    * @throws \InvalidArgumentException
-   *   Thrown when one of the passed arguments is invalid
+   *   Thrown when one of the passed arguments is invalid.
    */
   public function validateGenerateAliases(CommandData $commandData) {
     $input = $commandData->input();
@@ -214,10 +219,12 @@ class PathautoCommands extends DrushCommands {
   }
 
   /**
+   * Validate Aliases Types.
+   *
    * @hook validate
    *
    * @throws \InvalidArgumentException
-   *   Thrown when one of the passed arguments is invalid
+   *   Thrown when one of the passed arguments is invalid.
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    *   Thrown when an alias type can not be instantiated.
    */

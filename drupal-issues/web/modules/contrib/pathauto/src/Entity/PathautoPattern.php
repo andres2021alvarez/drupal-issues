@@ -99,6 +99,8 @@ class PathautoPattern extends ConfigEntityBase implements PathautoPatternInterfa
   protected $type;
 
   /**
+   * Collection of alias types.
+   *
    * @var \Drupal\Core\Plugin\DefaultSingleLazyPluginCollection
    */
   protected $aliasTypeCollection;
@@ -125,11 +127,15 @@ class PathautoPattern extends ConfigEntityBase implements PathautoPatternInterfa
   protected $selection_logic = 'and';
 
   /**
+   * The weight value, default is 0.
+   *
    * @var int
    */
   protected $weight = 0;
 
   /**
+   * Defines relationships where context tokens are keys and values are arrays.
+   *
    * @var array[]
    *   Keys are context tokens, and values are arrays with the following keys:
    *   - label (string|null, optional): The human-readable label of this
@@ -407,7 +413,7 @@ class PathautoPattern extends ConfigEntityBase implements PathautoPatternInterfa
    * object.
    *
    * @param string $token
-   *   A ":" delimited set of tokens representing
+   *   A ":" delimited set of tokens representing.
    * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   The array of available contexts.
    *

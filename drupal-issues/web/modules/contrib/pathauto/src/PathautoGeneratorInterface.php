@@ -10,17 +10,17 @@ use Drupal\Core\Entity\EntityInterface;
 interface PathautoGeneratorInterface {
 
   /**
-   * "Do nothing. Leave the old alias intact."
+   * Do nothing. Leave the old alias intact.
    */
   const UPDATE_ACTION_NO_NEW = 0;
 
   /**
-   * "Create a new alias. Leave the existing alias functioning."
+   * Create a new alias. Leave the existing alias functioning.
    */
   const UPDATE_ACTION_LEAVE = 1;
 
   /**
-   * "Create a new alias. Delete the old alias."
+   * Create a new alias. Delete the old alias.
    */
   const UPDATE_ACTION_DELETE = 2;
 
@@ -51,6 +51,7 @@ interface PathautoGeneratorInterface {
    *   An entity.
    *
    * @return \Drupal\pathauto\PathautoPatternInterface|null
+   *   The pattern object if found, or NULL if not.
    */
   public function getPatternByEntity(EntityInterface $entity);
 
@@ -73,17 +74,17 @@ interface PathautoGeneratorInterface {
   /**
    * Creates or updates an alias for the given entity.
    *
-   * @param EntityInterface $entity
-   *   Entity for which to update the alias.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity for which to update the alias.
    * @param string $op
-   *   The operation performed (insert, update)
+   *   The operation performed (insert, update).
    * @param array $options
-   *   - force: will force updating the path
-   *   - language: the language for which to create the alias
+   *   - Force: Will force updating the path.
+   *   - Language: The language for which to create the alias.
    *
    * @return array|null
-   *   - An array with alias data in case the alias has been created or updated.
-   *   - NULL if no operation performed.
+   *   - An array with alias data if the alias has been created or updated.
+   *   - NULL if no operation was performed.
    */
   public function updateEntityAlias(EntityInterface $entity, $op, array $options = []);
 

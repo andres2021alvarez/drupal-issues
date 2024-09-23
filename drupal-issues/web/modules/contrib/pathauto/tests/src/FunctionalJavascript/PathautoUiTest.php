@@ -59,6 +59,9 @@ class PathautoUiTest extends WebDriverTestBase {
     $this->drupalLogin($this->adminUser);
   }
 
+  /**
+   * Test Settings Validation.
+   */
   public function testSettingsValidation() {
     $this->drupalGet('/admin/config/search/path/settings');
 
@@ -69,6 +72,9 @@ class PathautoUiTest extends WebDriverTestBase {
     $this->assertSession()->elementAttributeContains('css', '#edit-max-component-length', 'min', '1');
   }
 
+  /**
+   * Test Patterns Workflow.
+   */
   public function testPatternsWorkflow() {
     $this->drupalPlaceBlock('local_tasks_block', ['id' => 'local-tasks-block']);
     $this->drupalPlaceBlock('local_actions_block');
@@ -106,7 +112,8 @@ class PathautoUiTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('Path pattern is using the following invalid tokens: [user:name], [term:name].');
     $this->assertSession()->pageTextNotContains('The configuration options have been saved.');
 
-    // We do not need ID anymore, it is already set in previous step and made a label by browser.
+    // We do not need ID anymore, it is already set in previous step and made
+    // a label by the browser.
     unset($edit['id']);
     $edit['pattern'] = '#[node:title]';
     $this->submitForm($edit, 'Save');

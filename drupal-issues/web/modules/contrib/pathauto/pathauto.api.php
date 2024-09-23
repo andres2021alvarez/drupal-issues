@@ -8,10 +8,7 @@
 use Drupal\Core\Language\Language;
 
 /**
- * @todo Update for 8.x-1.x
- *
- * It may be helpful to review some examples of integration from
- * pathauto.pathauto.inc.
+ * It may be helpful to review some examples of integration.
  *
  * Pathauto works by using tokens in path patterns.  Thus the simplest
  * integration is just to provide tokens.  Token support is provided by Drupal

@@ -102,7 +102,7 @@ interface AliasStorageHelperInterface {
   /**
    * Returns the count of url aliases for the source.
    *
-   * @param $source
+   * @param string $source
    *   An internal Drupal path prefix.
    *
    * @return int

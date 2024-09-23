@@ -253,7 +253,6 @@ class AliasCleaner implements AliasCleanerInterface {
       $output = strtr($output, $this->cleanStringCache['punctuation']);
     }
 
-
     // Reduce strings to letters and numbers.
     if ($this->cleanStringCache['reduce_ascii']) {
       $output = preg_replace('/[^a-zA-Z0-9\/]+/', $this->cleanStringCache['separator'], $output);

@@ -3,7 +3,24 @@
 namespace Drupal\pathauto;
 
 /**
- * @todo add class comment.
+ * Interface for cleaning and standardizing URL aliases.
+ *
+ * This interface defines methods for various operations related to cleaning
+ * and preparing URL aliases. It includes functionality to:
+ * - Clean up URL aliases by removing unnecessary characters and normalizing
+ *   the alias format.
+ * - Trim and standardize path separators.
+ * - Clean string segments to be used in URL aliases, including removing HTML
+ *   tags, transliterating characters, and handling punctuation and whitespace.
+ * - Provide punctuation character information.
+ * - Clean token values to ensure they are URL-friendly.
+ * - Reset internal caches used in the cleaning process.
+ *
+ * Implementations of this interface should provide the specific logic for
+ * cleaning URL aliases and handling various edge cases as described in the
+ * methods.
+ *
+ * @see \Pathauto\AliasCleaner
  */
 interface AliasCleanerInterface {
 
@@ -13,7 +30,7 @@ interface AliasCleanerInterface {
    * Performs the following alterations:
    * - Trim duplicate, leading, and trailing back-slashes.
    * - Trim duplicate, leading, and trailing separators.
-   * - Shorten to a desired length and logical position based on word boundaries.
+   * - Shorten to a desired length while respecting word boundaries.
    *
    * @param string $alias
    *   A string with the URL alias to clean up.
@@ -52,7 +69,7 @@ interface AliasCleanerInterface {
    * - Replace whitespace with the separator character.
    * - Trim duplicate, leading, and trailing separators.
    * - Convert to lower-case.
-   * - Shorten to a desired length and logical position based on word boundaries.
+   * - Shorten to a desired length while respecting word boundaries.
    *
    * This function should *not* be called on URL alias or path strings
    * because it is assumed that they are already clean.

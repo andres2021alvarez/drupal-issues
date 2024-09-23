@@ -13,7 +13,7 @@
 
 /**
  * @file
- * Main file for the Pathauto module, which automatically generates aliases for content.
+ * File for Pathauto module that auto-generates aliases for content.
  *
  * @ingroup pathauto
  */
@@ -147,8 +147,7 @@ function pathauto_entity_base_field_info(EntityTypeInterface $entity_type) {
 }
 
 /**
- * Validate the pattern field, to ensure it doesn't contain any characters that
- * are invalid in URLs.
+ * Validate the pattern field to ensure it has no invalid characters for URLs.
  */
 function pathauto_pattern_validate($element, FormStateInterface $form_state) {
 

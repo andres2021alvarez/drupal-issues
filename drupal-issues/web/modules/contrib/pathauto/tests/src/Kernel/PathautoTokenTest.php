@@ -20,6 +20,9 @@ class PathautoTokenTest extends KernelTestBase {
    */
   protected static $modules = ['system', 'token', 'path_alias', 'pathauto'];
 
+  /**
+   * Test Pathauto Tokens.
+   */
   public function testPathautoTokens() {
 
     $this->installConfig(['pathauto']);
@@ -35,8 +38,8 @@ class PathautoTokenTest extends KernelTestBase {
     $data['array'] = $array;
     $replacements = $this->assertTokens('array', $data, $tokens);
 
-    // Ensure that the cleanTokenValues() method does not alter this token value.
-    /* @var \Drupal\pathauto\AliasCleanerInterface $alias_cleaner */
+    // Ensure cleanTokenValues() does not alter this token value.
+    /** @var \Drupal\pathauto\AliasCleanerInterface $alias_cleaner */
     $alias_cleaner = \Drupal::service('pathauto.alias_cleaner');
     $alias_cleaner->cleanTokenValues($replacements, $data, []);
     $this->assertEquals('test-first-arg/array-value', $replacements['[array:join-path]']);
@@ -121,6 +124,9 @@ class PathautoTokenTest extends KernelTestBase {
     return $replacements;
   }
 
+  /**
+   * Map Token Names.
+   */
   public function mapTokenNames($type, array $tokens = []) {
     $return = [];
     foreach ($tokens as $token) {

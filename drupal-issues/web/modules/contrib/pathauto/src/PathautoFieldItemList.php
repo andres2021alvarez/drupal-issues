@@ -4,10 +4,26 @@ namespace Drupal\pathauto;
 
 use Drupal\path\Plugin\Field\FieldType\PathFieldItemList;
 
+/**
+ * Delegating calls and computing values.
+ */
 class PathautoFieldItemList extends PathFieldItemList {
 
   /**
-   * @{inheritdoc}
+   * Delegates a method call to a list of items.
+   *
+   * @param string $method
+   *   The method to call on each item in the list.
+   *
+   * @return array
+   *   An array of results, where each result corresponds to the output of
+   *   the method call on each item.
+   *
+   * @throws \Exception
+   *   Throws an exception if the method call fails.
+   *
+   * @todo Workaround until this is fixed, see
+   *   https://www.drupal.org/project/drupal/issues/2946289.
    */
   protected function delegateMethod($method) {
     // @todo Workaround until this is fixed, see
@@ -27,7 +43,7 @@ class PathautoFieldItemList extends PathFieldItemList {
   }
 
   /**
-   * @{inheritdoc}
+   * Computes and updates the value for the path alias.
    */
   protected function computeValue() {
     parent::computeValue();

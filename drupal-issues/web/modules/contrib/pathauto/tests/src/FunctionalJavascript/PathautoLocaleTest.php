@@ -41,8 +41,9 @@ class PathautoLocaleTest extends WebDriverTestBase {
   }
 
   /**
-   * Test that when an English node is updated, its old English alias is
-   * updated and its newer French alias is left intact.
+   * Test that updating an English node updates its English alias.
+   *
+   * The newer French alias should remain intact.
    */
   public function testLanguageAliases() {
 
@@ -57,7 +58,8 @@ class PathautoLocaleTest extends WebDriverTestBase {
       'path' => [[
         'alias' => '/english-node',
         'pathauto' => FALSE,
-      ]],
+      ],
+      ],
     ];
     $node = $this->drupalCreateNode($node);
     $english_alias = $this->loadPathAliasByConditions(['alias' => '/english-node', 'langcode' => 'en']);

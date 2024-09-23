@@ -1,7 +1,14 @@
 <?php
 
 /**
+ * @file
+ * Contains custom alterations to Pathauto punctuation characters.
+ */
+
+/**
  * Implements hook_pathauto_punctuation_chars_alter().
+ *
+ * Adds the copyright symbol to the list of punctuation characters.
  */
 function pathauto_custom_punctuation_test_pathauto_punctuation_chars_alter(array &$punctuation) {
   $punctuation['copyright'] = ['value' => '©', 'name' => t('Copyright symbol')];

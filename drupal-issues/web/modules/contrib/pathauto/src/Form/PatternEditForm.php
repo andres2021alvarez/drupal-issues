@@ -23,6 +23,8 @@ class PatternEditForm extends EntityForm {
   protected $manager;
 
   /**
+   * Entity base.
+   *
    * @var \Drupal\pathauto\PathautoPatternInterface
    */
   protected $entity;
@@ -109,7 +111,7 @@ class PatternEditForm extends EntityForm {
       '#suffix' => '</div>',
     ];
 
-    // if there is no type yet, stop here.
+    // If there is no type yet, stop here.
     if ($this->entity->getType()) {
 
       $alias_type = $this->entity->getAliasType();
