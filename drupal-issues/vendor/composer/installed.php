@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'drupal/recommended-project',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '478eee4dfdc5d85915668b7c3e16e5d4d55d741e',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -182,9 +182,9 @@
             'dev_requirement' => false,
         ),
         'drupal/coder' => array(
-            'pretty_version' => '8.3.24',
-            'version' => '8.3.24.0',
-            'reference' => '1a59890f972db5da091354f0191dec1037f7c582',
+            'pretty_version' => '8.3.25',
+            'version' => '8.3.25.0',
+            'reference' => 'c58e5a0c44c0010bbc8a91fc468f4667e177b976',
             'type' => 'phpcodesniffer-standard',
             'install_path' => __DIR__ . '/../drupal/coder',
             'aliases' => array(),
@@ -389,9 +389,9 @@
             'dev_requirement' => false,
         ),
         'drupal/recommended-project' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '478eee4dfdc5d85915668b7c3e16e5d4d55d741e',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
