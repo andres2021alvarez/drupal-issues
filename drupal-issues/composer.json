@@ -23,6 +23,7 @@
         "drupal/core-project-message": "^11.0",
         "drupal/core-recommended": "^11.0",
         "drupal/pathauto": "^1.13",
+        "drupal/redirect": "^1.10",
         "drupal/restui": "^1.22",
         "drush/drush": "^13.2",
         "squizlabs/php_codesniffer": "^3.10"
