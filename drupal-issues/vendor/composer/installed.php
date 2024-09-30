@@ -199,6 +199,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/content_sync' => array(
+            'pretty_version' => '4.0.0-rc2',
+            'version' => '4.0.0.0-RC2',
+            'reference' => '4.0.0-rc2',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/content_sync',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/core' => array(
             'pretty_version' => '10.3.5',
             'version' => '10.3.5.0',
