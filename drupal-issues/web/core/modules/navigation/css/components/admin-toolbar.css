@@ -234,7 +234,6 @@ body {
 }
 .admin-toolbar__logo img {
   display: block;
-  max-width: var(--admin-toolbar-space-40);
 }
 /**
  * Scroll wrapper for Mobile.
