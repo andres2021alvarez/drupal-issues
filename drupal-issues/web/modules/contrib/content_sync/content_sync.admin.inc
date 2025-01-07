@@ -22,7 +22,7 @@ function cs_log_filters() {
   $filters = [];
 
   foreach (_dblog_get_message_types() as $type) {
-    $types[$type] = t($type);
+    $types[$type] = t('@type', ['@type' => $type]);
   }
 
   if (!empty($types)) {

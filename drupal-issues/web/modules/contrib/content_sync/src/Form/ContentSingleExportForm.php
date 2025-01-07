@@ -31,6 +31,8 @@ class ContentSingleExportForm extends FormBase {
   protected $entityBundleManager;
 
   /**
+   * ContentExporter  implementation.
+   *
    * @var \Drupal\content_sync\Exporter\ContentExporterInterface
    */
   protected $contentExporter;
@@ -39,10 +41,11 @@ class ContentSingleExportForm extends FormBase {
    * Constructs a new ContentSingleExportForm.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *
+   *   The entityTypeManager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entity_bundle_manager
-   *
+   *   The entityTypeBundleInfo.
    * @param \Drupal\content_sync\Exporter\ContentExporterInterface $content_exporter
+   *   The contentExporter.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfo $entity_bundle_manager, ContentExporterInterface $content_exporter) {
     $this->entityTypeManager = $entity_type_manager;
@@ -116,7 +119,6 @@ class ContentSingleExportForm extends FormBase {
           'event' => 'autocompleteclose',
         ],
       ];
-      // Autocomplete doesn't support target bundles parameter on bundle-less entities.
       $target_type = $this->entityTypeManager->getDefinition($default_type);
       $target_type_bundles = $target_type->getBundleEntityType();
       if (is_null($target_type_bundles)) {

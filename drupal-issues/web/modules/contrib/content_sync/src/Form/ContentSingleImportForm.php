@@ -15,11 +15,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ContentSingleImportForm extends FormBase {
 
   /**
+   * EntityTypeManager implementation.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * ContentImporter implementation.
+   *
    * @var \Drupal\content_sync\Importer\ContentImporterInterface
    */
   protected $contentImporter;
@@ -33,7 +37,7 @@ class ContentSingleImportForm extends FormBase {
   }
 
   /**
-   *
+   * Create container.
    */
   public static function create(ContainerInterface $container) {
     return new static(
@@ -79,7 +83,7 @@ class ContentSingleImportForm extends FormBase {
       // Store the decoded version of the submitted import.
       $form_state->setValueForElement($form['import'], $data);
       if (empty($data['_content_sync']['entity_type'])) {
-        throw new \Exception($this->t('Entity type could not be determined.'));
+        throw new \Exception('Entity type could not be determined.');
       }
     }
     catch (\Exception $e) {

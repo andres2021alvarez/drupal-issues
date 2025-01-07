@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\content_sync\ContentSyncManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Construct the storage changes in a content synchronization form.
@@ -40,9 +41,18 @@ class ContentSync extends FormBase {
   protected $configManager;
 
   /**
+   * The content sync manager.
+   *
    * @var \Drupal\content_sync\ContentSyncManagerInterface
    */
   protected $contentSyncManager;
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
 
   /**
    * Constructs the object.
@@ -55,12 +65,21 @@ class ContentSync extends FormBase {
    *   Configuration manager.
    * @param \Drupal\content_sync\ContentSyncManagerInterface $content_sync_manager
    *   The content sync manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
-  public function __construct(StorageInterface $sync_storage, StorageInterface $active_storage, ConfigManagerInterface $config_manager, ContentSyncManagerInterface $content_sync_manager) {
+  public function __construct(
+    StorageInterface $sync_storage,
+    StorageInterface $active_storage,
+    ConfigManagerInterface $config_manager,
+    ContentSyncManagerInterface $content_sync_manager,
+    ConfigFactoryInterface $config_factory,
+  ) {
     $this->syncStorage = $sync_storage;
     $this->activeStorage = $active_storage;
     $this->configManager = $config_manager;
     $this->contentSyncManager = $content_sync_manager;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -71,7 +90,8 @@ class ContentSync extends FormBase {
       $container->get('content.storage.sync'),
       $container->get('content.storage'),
       $container->get('config.manager'),
-      $container->get('content_sync.manager')
+      $container->get('content_sync.manager'),
+            $container->get('config.factory')
     );
   }
 
@@ -87,7 +107,7 @@ class ContentSync extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Validate site uuid unless bypass the validation is selected.
-    $config = \Drupal::config('content_sync.settings');
+    $config = $this->configFactory->get('content_sync.settings');
     if ($config->get('content_sync.site_uuid_override') == FALSE) {
       // Get site uuid from site settings configuration.
       $site_config = $this->config('system.site');
@@ -108,7 +128,6 @@ class ContentSync extends FormBase {
     ];
 
     // Check that there is something on the content sync folder.
-    $source_list = $this->syncStorage->listAll();
     $storage_comparer = new StorageComparer($this->syncStorage, $this->activeStorage, $this->configManager);
     $storage_comparer->createChangelist();
 
@@ -209,7 +228,7 @@ class ContentSync extends FormBase {
     // Get the files to be processed.
     $content_to_sync = [];
     $content_to_delete = [];
-    foreach ($collections as $collection => $collection_name) {
+    foreach ($collections as $collection_name) {
       $actions = $comparer->getChangeList("", $collection_name);
       if (!empty($actions['create'])) {
         $content_to_sync = array_merge($content_to_sync, $actions['create']);

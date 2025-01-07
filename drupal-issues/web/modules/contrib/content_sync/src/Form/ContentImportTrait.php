@@ -10,16 +10,17 @@ use Drupal\Core\Entity\EntityStorageException;
 trait ContentImportTrait {
 
   /**
-   * @param $content_to_sync
+   * Generates a batch operation for synchronizing.
    *
-   * @param $content_to_delete
-   *
-   * @param $serializer_context
-   *
-   *   content_sync_directory:
-   *   path for the content sync directory.
+   * @param mixed $content_to_sync
+   *   Refers to the content that needs to be synchronized.
+   * @param mixed $content_to_delete
+   *   Flag indicating whether to delete the content.
+   * @param mixed $serializer_context
+   *   Configuration options to the serializer when generating the import batch.
    *
    * @return array
+   *   return array with the content and the content type
    */
   public function generateImportBatch($content_to_sync, $content_to_delete, $serializer_context = []) {
     $serializer_context['content_sync_directory_entities'] = content_sync_get_content_directory('sync') . "/entities";
@@ -31,16 +32,17 @@ trait ContentImportTrait {
       'title' => $this->t('Synchronizing Content...'),
       'message' => $this->t('Synchronizing Content...'),
       'operations' => $operations,
-      // 'finished' => [$this, 'finishImportBatch'],
     ];
     return $batch;
   }
 
   /**
-   * Processes the content import to be updated or created batch and persists the importer.
+   * Processes the content import to be updated or created batch.
    *
-   * @param $content_to_sync
+   * @param mixed $content_to_sync
+   *   Refers to the content that needs to be synchronized.
    * @param string $serializer_context
+   *   Configuration options to the serializer when generating the import batch.
    * @param array $context
    *   The batch context.
    */
@@ -71,7 +73,7 @@ trait ContentImportTrait {
         $bundle = $entity->bundle();
         $entity_id = $entity->getEntityTypeId();
         $name = $entity_id . "." . $bundle . "." . $entity->uuid();
-        $cache = \Drupal::cache('content')->invalidate($entity_id . "." . $bundle . ":" . $name);
+        \Drupal::cache('content')->invalidate($entity_id . "." . $bundle . ":" . $name);
         unset($entity);
       }
       else {
@@ -92,16 +94,16 @@ trait ContentImportTrait {
       // We need to count the progress anyway even if an error has occured.
       $context['sandbox']['progress']++;
     }
-    $context['finished'] = $context['sandbox']['max'] > 0
-                        && $context['sandbox']['progress'] < $context['sandbox']['max'] ?
-                           $context['sandbox']['progress'] / $context['sandbox']['max'] : 1;
+    $context['finished'] = $context['sandbox']['max'] > 0 && $context['sandbox']['progress'] < $context['sandbox']['max'] ? $context['sandbox']['progress'] / $context['sandbox']['max'] : 1;
   }
 
   /**
-   * Processes the content import to be deleted or created batch and persists the importer.
+   * Processes the content import to be deleted or created batch .
    *
-   * @param $content_to_sync
+   * @param mixed $content_to_delete
+   *   Refers to the content that needs to be synchronized.
    * @param string $serializer_context
+   *   Configuration options to the serializer when generating the import batch.
    * @param array $context
    *   The batch context.
    */
@@ -148,7 +150,7 @@ trait ContentImportTrait {
             // Invalidate the CS Cache of the entity.
             $bundle = $entity->bundle();
             $name = $entity_type_id . "." . $bundle . "." . $entity->uuid();
-            $cache = \Drupal::cache('content')->invalidate($entity_type_id . "." . $bundle . ":" . $name);
+            \Drupal::cache('content')->invalidate($entity_type_id . "." . $bundle . ":" . $name);
           }
           catch (EntityStorageException $e) {
             $message = $e->getMessage();

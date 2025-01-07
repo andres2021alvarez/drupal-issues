@@ -1,0 +1,487 @@
+diff --git a/content_sync.admin.inc b/content_sync.admin.inc
+index 83ad70ad..83957ce0 100644
+--- a/content_sync.admin.inc
++++ b/content_sync.admin.inc
+@@ -22,7 +22,7 @@ function cs_log_filters() {
+   $filters = [];
+
+   foreach (_dblog_get_message_types() as $type) {
+-    $types[$type] = t($type);
++    $types[$type] = t('@type', ['@type' => $type]);
+   }
+
+   if (!empty($types)) {
+diff --git a/content_sync.module b/content_sync.module
+index e752b629..51979c02 100755
+--- a/content_sync.module
++++ b/content_sync.module
+@@ -127,7 +127,7 @@ function content_sync_theme() {
+ /**
+  * Implements hook_file_download().
+  */
+-function content_file_download($uri) {
++function content_sync_file_download($uri) {
+   $scheme = \Drupal::service('stream_wrapper_manager')->getScheme($uri);
+   $target = \Drupal::service('stream_wrapper_manager')->getTarget($uri);
+   if ($scheme == 'temporary' && $target == 'content.tar.gz') {
+@@ -175,12 +175,6 @@ function content_file_download($uri) {
+ function content_sync_get_content_directory($type) {
+   global $content_directories;
+
+-  // @todo Remove fallback in Drupal 9. https://www.drupal.org/node/2574943
+-  /*if ($type == CONTENT_SYNC_DIRECTORY &&
+-  !isset($content_directories[CONTENT_SYNC_DIRECTORY])
+-  && isset($content_directories[CONTENT_STAGING_DIRECTORY])) {
+-  $type = CONTENT_STAGING_DIRECTORY;
+-  }*/
+   if ($type == 'sync' &&
+     !isset($content_directories['sync'])
+     && isset($content_directories['staging'])) {
+@@ -190,8 +184,6 @@ function content_sync_get_content_directory($type) {
+   if (!empty($content_directories[$type])) {
+     return $content_directories[$type];
+   }
+-  // @todo https://www.drupal.org/node/2696103 Throw a more specific exception.
+-  // throw new \Exception("The content directory type '$type' does not exist");
+   \Drupal::messenger()->addError("The content directory type '$type' does not exist");
+ }
+
+@@ -221,7 +213,7 @@ function content_sync_entity_update(EntityInterface $entity) {
+     $activeStorage = new ContentDatabaseStorage(\Drupal::database(), 'cs_db_snapshot');
+     $activeStorage->csWrite($name, Yaml::decode($exported_entity), $entity_type . "." . $entity_bundle);
+     // Invalidate the CS Cache of the entity.
+-    $cache = \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
++    \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
+   }
+ }
+
+@@ -255,6 +247,6 @@ function content_sync_entity_delete(EntityInterface $entity) {
+     $activeStorage = new ContentDatabaseStorage(\Drupal::database(), 'cs_db_snapshot');
+     $activeStorage->csDelete($name);
+     // Invalidate the CS Cache of the entity.
+-    $cache = \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
++    \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
+   }
+ }
+diff --git a/content_sync.routing.yml b/content_sync.routing.yml
+index c7527c67..08badd1e 100755
+--- a/content_sync.routing.yml
++++ b/content_sync.routing.yml
+@@ -97,7 +97,7 @@ content.help.about:
+     _controller: '\Drupal\content_sync\Controller\ContentHelpController::about'
+     _title: 'How can we help you?'
+   requirements:
+-    _permission: 'access administration pages'
++    _permission: 'administer site configuration'
+
+ content_sync.element.message.close:
+   path: '/content_sync/message/close/{storage}/{id}'
+diff --git a/includes/content_sync.theme.inc b/includes/content_sync.theme.inc
+index 2d858f6f..1c913c7d 100644
+--- a/includes/content_sync.theme.inc
++++ b/includes/content_sync.theme.inc
+@@ -39,10 +39,6 @@ function template_preprocess_content_sync_help(array &$variables) {
+   $variables['help'] = $help;
+ }
+
+-/******************************************************************************/
+-// Element templates.
+-/******************************************************************************/
+-
+ /**
+  * Prepares variables for Content Sync message templates.
+  *
+diff --git a/src/Form/ContentExportForm.php b/src/Form/ContentExportForm.php
+index 1f3d3c79..9c8edace 100755
+--- a/src/Form/ContentExportForm.php
++++ b/src/Form/ContentExportForm.php
+@@ -19,21 +19,29 @@ class ContentExportForm extends FormBase {
+   use ContentExportTrait;
+
+   /**
++   * EntityTypeManager implementation.
++   *
+    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+    */
+   protected $entityTypeManager;
+
+   /**
++   * ContentExporter  implementation.
++   *
+    * @var \Drupal\content_sync\Exporter\ContentExporterInterface
+    */
+   protected $contentExporter;
+
+   /**
++   * The content sync manager.
++   *
+    * @var \Drupal\content_sync\ContentSyncManagerInterface
+    */
+   protected $contentSyncManager;
+
+   /**
++   * File system service.
++   *
+    * @var \Drupal\Core\File\FileSystemInterface
+    */
+   protected $fileSystem;
+@@ -49,7 +57,7 @@ public function __construct(EntityTypeManagerInterface $entity_type_manager, Con
+   }
+
+   /**
+-   *
++   * Create container instance.
+    */
+   public static function create(ContainerInterface $container) {
+     return new static(
+@@ -112,7 +120,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+   }
+
+   /**
+-   *
++   * Retrieves entities of content entity type and generates a batch.
+    */
+   public function snapshot() {
+     // Set batch operations by entity type/bundle.
+@@ -141,21 +149,21 @@ public function snapshot() {
+   }
+
+   /**
+-   * @{@inheritdoc}
++   * Returns the entity type manager.
+    */
+   protected function getEntityTypeManager() {
+     return $this->entityTypeManager;
+   }
+
+   /**
+-   * @{@inheritdoc}
++   * Returns the contentExporter property of the current object.
+    */
+   protected function getContentExporter() {
+     return $this->contentExporter;
+   }
+
+   /**
+-   * @{@inheritdoc}
++   * Returns the logger named 'content_sync'.
+    */
+   protected function getExportLogger() {
+     return $this->logger('content_sync');
+diff --git a/src/Form/ContentImportForm.php b/src/Form/ContentImportForm.php
+index be7220e6..7cc86cc6 100644
+--- a/src/Form/ContentImportForm.php
++++ b/src/Form/ContentImportForm.php
+@@ -25,8 +25,13 @@ public function buildForm(array $form, FormStateInterface $form_state) {
+     $directory = content_sync_get_content_directory('sync');
+     $directory_is_writable = is_writable($directory);
+     if (!$directory_is_writable) {
+-      $this->logger('content_sync')->error('The directory %directory is not writable.', ['%directory' => $directory, 'link' => 'Import Archive']);
+-      $this->messenger()->addError($this->t('The directory %directory is not writable.', ['%directory' => $directory]));
++      $this->logger('content_sync')->error('The directory %directory is not writable.', [
++        '%directory' => $directory,
++        'link' => 'Import Archive',
++      ]);
++      $this->messenger()->addError($this->t('The directory %directory is not writable.', [
++        '%directory' => $directory,
++      ]));
+     }
+
+     $form['import_tarball'] = [
+@@ -64,7 +69,7 @@ public function validateForm(array &$form, FormStateInterface $form_state) {
+   public function submitForm(array &$form, FormStateInterface $form_state) {
+     if ($path = $form_state->getValue('import_tarball')) {
+       $directory = content_sync_get_content_directory('sync');
+-      emptyDirectory($directory);
++      empty_directory($directory);
+       try {
+         $archiver = new ArchiveTar($path, 'gz');
+         $files = [];
+@@ -77,8 +82,13 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+         $form_state->setRedirect('content.sync');
+       }
+       catch (\Exception $e) {
+-        $this->messenger()->addError($this->t('Could not extract the contents of the tar file. The error message is <em>@message</em>', ['@message' => $e->getMessage()]));
+-        $this->logger('content_sync')->error('Could not extract the contents of the tar file. The error message is <em>@message</em>', ['@message' => $e->getMessage(), 'link' => 'Import Archive']);
++        $this->messenger()->addError($this->t('Could not extract the contents of the tar file. The error message is <em>@message</em>', [
++          '@message' => $e->getMessage(),
++        ]));
++        $this->logger('content_sync')->error('Could not extract the contents of the tar file. The error message is <em>@message</em>', [
++          '@message' => $e->getMessage(),
++          'link' => 'Import Archive',
++        ]);
+       }
+       drupal_flush_all_caches();
+       unlink($path);
+@@ -90,7 +100,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+ /**
+  * Help to empty a directory.
+  */
+-function emptyDirectory($dirname, $self_delete = FALSE) {
++function empty_directory($dirname, $self_delete = FALSE) {
+   if (is_dir($dirname)) {
+     $dir_handle = opendir($dirname);
+   }
+@@ -103,7 +113,7 @@ function emptyDirectory($dirname, $self_delete = FALSE) {
+         @unlink($dirname . "/" . $file);
+       }
+       else {
+-        emptyDirectory($dirname . '/' . $file, TRUE);
++        empty_directory($dirname . '/' . $file, TRUE);
+       }
+     }
+   }
+diff --git a/src/Form/ContentImportTrait.php b/src/Form/ContentImportTrait.php
+index 1dea82be..1e8c0eed 100644
+--- a/src/Form/ContentImportTrait.php
++++ b/src/Form/ContentImportTrait.php
+@@ -10,16 +10,17 @@
+ trait ContentImportTrait {
+
+   /**
+-   * @param $content_to_sync
++   * Generates a batch operation for synchronizing.
+    *
+-   * @param $content_to_delete
+-   *
+-   * @param $serializer_context
+-   *
+-   *   content_sync_directory:
+-   *   path for the content sync directory.
++   * @param mixed $content_to_sync
++   *   Refers to the content that needs to be synchronized.
++   * @param mixed $content_to_delete
++   *   Flag indicating whether to delete the content.
++   * @param mixed $serializer_context
++   *   Configuration options to the serializer when generating the import batch.
+    *
+    * @return array
++   *   return array with the content and the content type
+    */
+   public function generateImportBatch($content_to_sync, $content_to_delete, $serializer_context = []) {
+     $serializer_context['content_sync_directory_entities'] = content_sync_get_content_directory('sync') . "/entities";
+@@ -31,16 +32,17 @@ public function generateImportBatch($content_to_sync, $content_to_delete, $seria
+       'title' => $this->t('Synchronizing Content...'),
+       'message' => $this->t('Synchronizing Content...'),
+       'operations' => $operations,
+-      // 'finished' => [$this, 'finishImportBatch'],
+     ];
+     return $batch;
+   }
+
+   /**
+-   * Processes the content import to be updated or created batch and persists the importer.
++   * Processes the content import to be updated or created batch.
+    *
+-   * @param $content_to_sync
++   * @param mixed $content_to_sync
++   *   Refers to the content that needs to be synchronized.
+    * @param string $serializer_context
++   *   Configuration options to the serializer when generating the import batch.
+    * @param array $context
+    *   The batch context.
+    */
+@@ -71,7 +73,7 @@ public function syncContent(array $content_to_sync, $serializer_context, &$conte
+         $bundle = $entity->bundle();
+         $entity_id = $entity->getEntityTypeId();
+         $name = $entity_id . "." . $bundle . "." . $entity->uuid();
+-        $cache = \Drupal::cache('content')->invalidate($entity_id . "." . $bundle . ":" . $name);
++        \Drupal::cache('content')->invalidate($entity_id . "." . $bundle . ":" . $name);
+         unset($entity);
+       }
+       else {
+@@ -92,16 +94,16 @@ public function syncContent(array $content_to_sync, $serializer_context, &$conte
+       // We need to count the progress anyway even if an error has occured.
+       $context['sandbox']['progress']++;
+     }
+-    $context['finished'] = $context['sandbox']['max'] > 0
+-                        && $context['sandbox']['progress'] < $context['sandbox']['max'] ?
+-                           $context['sandbox']['progress'] / $context['sandbox']['max'] : 1;
++    $context['finished'] = $context['sandbox']['max'] > 0 && $context['sandbox']['progress'] < $context['sandbox']['max'] ? $context['sandbox']['progress'] / $context['sandbox']['max'] : 1;
+   }
+
+   /**
+-   * Processes the content import to be deleted or created batch and persists the importer.
++   * Processes the content import to be deleted or created batch .
+    *
+-   * @param $content_to_sync
++   * @param mixed $content_to_delete
++   *   Refers to the content that needs to be synchronized.
+    * @param string $serializer_context
++   *   Configuration options to the serializer when generating the import batch.
+    * @param array $context
+    *   The batch context.
+    */
+@@ -148,7 +150,7 @@ public function deleteContent(array $content_to_delete, $serializer_context, &$c
+             // Invalidate the CS Cache of the entity.
+             $bundle = $entity->bundle();
+             $name = $entity_type_id . "." . $bundle . "." . $entity->uuid();
+-            $cache = \Drupal::cache('content')->invalidate($entity_type_id . "." . $bundle . ":" . $name);
++            \Drupal::cache('content')->invalidate($entity_type_id . "." . $bundle . ":" . $name);
+           }
+           catch (EntityStorageException $e) {
+             $message = $e->getMessage();
+diff --git a/src/Form/ContentSingleExportForm.php b/src/Form/ContentSingleExportForm.php
+index a899b2e8..bb83c2e4 100755
+--- a/src/Form/ContentSingleExportForm.php
++++ b/src/Form/ContentSingleExportForm.php
+@@ -31,6 +31,8 @@ class ContentSingleExportForm extends FormBase {
+   protected $entityBundleManager;
+
+   /**
++   * ContentExporter  implementation.
++   *
+    * @var \Drupal\content_sync\Exporter\ContentExporterInterface
+    */
+   protected $contentExporter;
+@@ -39,10 +41,11 @@ class ContentSingleExportForm extends FormBase {
+    * Constructs a new ContentSingleExportForm.
+    *
+    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+-   *
++   *   The entityTypeManager.
+    * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entity_bundle_manager
+-   *
++   *   The entityTypeBundleInfo.
+    * @param \Drupal\content_sync\Exporter\ContentExporterInterface $content_exporter
++   *   The contentExporter.
+    */
+   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfo $entity_bundle_manager, ContentExporterInterface $content_exporter) {
+     $this->entityTypeManager = $entity_type_manager;
+@@ -116,7 +119,6 @@ public function buildForm(array $form, FormStateInterface $form_state, $content_
+           'event' => 'autocompleteclose',
+         ],
+       ];
+-      // Autocomplete doesn't support target bundles parameter on bundle-less entities.
+       $target_type = $this->entityTypeManager->getDefinition($default_type);
+       $target_type_bundles = $target_type->getBundleEntityType();
+       if (is_null($target_type_bundles)) {
+diff --git a/src/Form/ContentSingleImportForm.php b/src/Form/ContentSingleImportForm.php
+index 4a1c7e30..880a49f7 100755
+--- a/src/Form/ContentSingleImportForm.php
++++ b/src/Form/ContentSingleImportForm.php
+@@ -15,11 +15,15 @@
+ class ContentSingleImportForm extends FormBase {
+
+   /**
++   * EntityTypeManager implementation.
++   *
+    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+    */
+   protected $entityTypeManager;
+
+   /**
++   * ContentImporter implementation.
++   *
+    * @var \Drupal\content_sync\Importer\ContentImporterInterface
+    */
+   protected $contentImporter;
+@@ -33,7 +37,7 @@ public function __construct(EntityTypeManagerInterface $entity_type_manager, Con
+   }
+
+   /**
+-   *
++   * Create container.
+    */
+   public static function create(ContainerInterface $container) {
+     return new static(
+@@ -79,7 +83,7 @@ public function validateForm(array &$form, FormStateInterface $form_state) {
+       // Store the decoded version of the submitted import.
+       $form_state->setValueForElement($form['import'], $data);
+       if (empty($data['_content_sync']['entity_type'])) {
+-        throw new \Exception($this->t('Entity type could not be determined.'));
++        throw new \Exception('Entity type could not be determined.');
+       }
+     }
+     catch (\Exception $e) {
+diff --git a/src/Form/ContentSync.php b/src/Form/ContentSync.php
+index 29e16a1e..9a78481f 100755
+--- a/src/Form/ContentSync.php
++++ b/src/Form/ContentSync.php
+@@ -10,6 +10,7 @@
+ use Drupal\Core\Url;
+ use Drupal\content_sync\ContentSyncManagerInterface;
+ use Symfony\Component\DependencyInjection\ContainerInterface;
++use Drupal\Core\Config\ConfigFactoryInterface;
+
+ /**
+  * Construct the storage changes in a content synchronization form.
+@@ -40,10 +41,19 @@ class ContentSync extends FormBase {
+   protected $configManager;
+
+   /**
++   * The content sync manager.
++   *
+    * @var \Drupal\content_sync\ContentSyncManagerInterface
+    */
+   protected $contentSyncManager;
+
++  /**
++   * The config factory.
++   *
++   * @var \Drupal\Core\Config\ConfigFactoryInterface
++   */
++  protected $configFactory;
++
+   /**
+    * Constructs the object.
+    *
+@@ -55,12 +65,21 @@ class ContentSync extends FormBase {
+    *   Configuration manager.
+    * @param \Drupal\content_sync\ContentSyncManagerInterface $content_sync_manager
+    *   The content sync manager.
++   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
++   *   The config factory.
+    */
+-  public function __construct(StorageInterface $sync_storage, StorageInterface $active_storage, ConfigManagerInterface $config_manager, ContentSyncManagerInterface $content_sync_manager) {
++  public function __construct(
++    StorageInterface $sync_storage,
++    StorageInterface $active_storage,
++    ConfigManagerInterface $config_manager,
++    ContentSyncManagerInterface $content_sync_manager,
++    ConfigFactoryInterface $config_factory,
++  ) {
+     $this->syncStorage = $sync_storage;
+     $this->activeStorage = $active_storage;
+     $this->configManager = $config_manager;
+     $this->contentSyncManager = $content_sync_manager;
++    $this->configFactory = $config_factory;
+   }
+
+   /**
+@@ -71,7 +90,8 @@ public static function create(ContainerInterface $container) {
+       $container->get('content.storage.sync'),
+       $container->get('content.storage'),
+       $container->get('config.manager'),
+-      $container->get('content_sync.manager')
++      $container->get('content_sync.manager'),
++            $container->get('config.factory')
+     );
+   }
+
+@@ -87,7 +107,7 @@ public function getFormId() {
+    */
+   public function buildForm(array $form, FormStateInterface $form_state) {
+     // Validate site uuid unless bypass the validation is selected.
+-    $config = \Drupal::config('content_sync.settings');
++    $config = $this->configFactory->get('content_sync.settings');
+     if ($config->get('content_sync.site_uuid_override') == FALSE) {
+       // Get site uuid from site settings configuration.
+       $site_config = $this->config('system.site');
+@@ -108,7 +128,6 @@ public function buildForm(array $form, FormStateInterface $form_state) {
+     ];
+
+     // Check that there is something on the content sync folder.
+-    $source_list = $this->syncStorage->listAll();
+     $storage_comparer = new StorageComparer($this->syncStorage, $this->activeStorage, $this->configManager);
+     $storage_comparer->createChangelist();
+
+@@ -209,7 +228,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+     // Get the files to be processed.
+     $content_to_sync = [];
+     $content_to_delete = [];
+-    foreach ($collections as $collection => $collection_name) {
++    foreach ($collections as $collection_name) {
+       $actions = $comparer->getChangeList("", $collection_name);
+       if (!empty($actions['create'])) {
+         $content_to_sync = array_merge($content_to_sync, $actions['create']);

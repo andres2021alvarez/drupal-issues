@@ -39,10 +39,6 @@ function template_preprocess_content_sync_help(array &$variables) {
   $variables['help'] = $help;
 }
 
-/******************************************************************************/
-// Element templates.
-/******************************************************************************/
-
 /**
  * Prepares variables for Content Sync message templates.
  *

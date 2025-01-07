@@ -19,21 +19,29 @@ class ContentExportForm extends FormBase {
   use ContentExportTrait;
 
   /**
+   * EntityTypeManager implementation.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * ContentExporter  implementation.
+   *
    * @var \Drupal\content_sync\Exporter\ContentExporterInterface
    */
   protected $contentExporter;
 
   /**
+   * The content sync manager.
+   *
    * @var \Drupal\content_sync\ContentSyncManagerInterface
    */
   protected $contentSyncManager;
 
   /**
+   * File system service.
+   *
    * @var \Drupal\Core\File\FileSystemInterface
    */
   protected $fileSystem;
@@ -49,7 +57,7 @@ class ContentExportForm extends FormBase {
   }
 
   /**
-   *
+   * Create container instance.
    */
   public static function create(ContainerInterface $container) {
     return new static(
@@ -112,7 +120,7 @@ class ContentExportForm extends FormBase {
   }
 
   /**
-   *
+   * Retrieves entities of content entity type and generates a batch.
    */
   public function snapshot() {
     // Set batch operations by entity type/bundle.
@@ -141,21 +149,21 @@ class ContentExportForm extends FormBase {
   }
 
   /**
-   * @{@inheritdoc}
+   * Returns the entity type manager.
    */
   protected function getEntityTypeManager() {
     return $this->entityTypeManager;
   }
 
   /**
-   * @{@inheritdoc}
+   * Returns the contentExporter property of the current object.
    */
   protected function getContentExporter() {
     return $this->contentExporter;
   }
 
   /**
-   * @{@inheritdoc}
+   * Returns the logger named 'content_sync'.
    */
   protected function getExportLogger() {
     return $this->logger('content_sync');
