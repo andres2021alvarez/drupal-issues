@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\Tests\authorization\Kernel\Service;
+namespace Drupal\Tests\authorization\Kernel;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
 
 /**
  * Tests the admin listing fallback when views is not enabled.

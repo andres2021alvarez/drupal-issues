@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Test\authorization\Unit;
+namespace Drupal\Tests\authorization\Unit;
 
-use Drupal\authorization\AuthorizationResponse;
-use Drupal\authorization\AuthorizationServiceInterface;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\AuthorizationResponse;
+use Drupal\authorization\AuthorizationServiceInterface;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -18,8 +18,31 @@ require_once __DIR__ . '/../../../authorization.module';
 
 /**
  * Test authorization module.
+ *
+ * @group authorization
  */
 class AuthorizationTest extends UnitTestCase {
+
+  /**
+   * The service.
+   *
+   * @var \Drupal\authorization\AuthorizationServiceInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $service;
+
+  /**
+   * The config.
+   *
+   * @var \Drupal\Core\Config\Config|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $config;
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\Messenger|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $messenger;
 
   /**
    * {@inheritdoc}
@@ -56,7 +79,7 @@ class AuthorizationTest extends UnitTestCase {
   /**
    * Test user login hook.
    */
-  public function testAuthoricationUserLogin(): void {
+  public function testAuthenticatedUserLogin(): void {
 
     $account = $this->createMock(UserInterface::class);
 

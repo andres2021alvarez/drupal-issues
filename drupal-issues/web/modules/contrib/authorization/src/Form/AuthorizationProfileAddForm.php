@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Form;
 
-use Drupal\authorization\Consumer\ConsumerPluginManager;
-use Drupal\authorization\Provider\ProviderPluginManager;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\authorization\Consumer\ConsumerPluginManager;
+use Drupal\authorization\Provider\ProviderPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -30,7 +30,7 @@ final class AuthorizationProfileAddForm extends AuthorizationProfileForm {
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     ProviderPluginManager $provider_plugin_manager,
-    ConsumerPluginManager $consumer_plugin_manager
+    ConsumerPluginManager $consumer_plugin_manager,
   ) {
     $this->storage = $entity_type_manager->getStorage('authorization_profile');
     $this->providerPluginManager = $provider_plugin_manager;

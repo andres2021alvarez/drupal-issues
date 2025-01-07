@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\authorization;
 
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\authorization\Consumer\ConsumerInterface;
 use Drupal\authorization\Provider\ProviderInterface;
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\user\UserInterface;
 
 /**

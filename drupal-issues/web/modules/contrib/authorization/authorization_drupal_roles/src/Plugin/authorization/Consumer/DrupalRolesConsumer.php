@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\authorization_drupal_roles\Plugin\authorization\Consumer;
 
-use Drupal\authorization\Consumer\ConsumerPluginBase;
-use Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface;
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\authorization\Consumer\ConsumerPluginBase;
+use Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use function in_array;
@@ -67,7 +67,8 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
     array $plugin_definition,
     TransliterationInterface $transliteration,
     EntityTypeManagerInterface $entity_type_manager,
-    AuthorizationDrupalRolesInterface $authorization_drupal_roles) {
+    AuthorizationDrupalRolesInterface $authorization_drupal_roles,
+  ) {
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->transliteration = $transliteration;

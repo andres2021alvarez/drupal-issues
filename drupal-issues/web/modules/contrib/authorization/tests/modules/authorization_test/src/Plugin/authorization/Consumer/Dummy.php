@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\authorization_test\Plugin\authorization\Consumer;
 
-use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\user\UserInterface;
 
 /**

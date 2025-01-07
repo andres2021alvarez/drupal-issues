@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Kernel\Form;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
-use Drupal\authorization\Form\AuthorizationProfileDeleteForm;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
+use Drupal\authorization\Form\AuthorizationProfileDeleteForm;
 
 /**
  * Test Authorization Profile Delete Form.

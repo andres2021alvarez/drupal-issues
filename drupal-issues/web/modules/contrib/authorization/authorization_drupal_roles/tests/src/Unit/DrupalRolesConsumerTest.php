@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization_drupal_roles\Unit;
 
-use Drupal\authorization\AuthorizationProfileInterface;
-use Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface;
-use Drupal\authorization_drupal_roles\Plugin\authorization\Consumer\DrupalRolesConsumer;
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface;
+use Drupal\authorization_drupal_roles\Plugin\authorization\Consumer\DrupalRolesConsumer;
 use Drupal\user\RoleInterface;
 use Drupal\user\RoleStorageInterface;
 use Drupal\user\UserInterface;
@@ -32,6 +32,41 @@ class DrupalRolesConsumerTest extends UnitTestCase {
    * @var \Symfony\Component\DependencyInjection\ContainerInterface
    */
   protected $container;
+
+  /**
+   * The consumer.
+   *
+   * @var \Drupal\authorization_drupal_roles\Plugin\authorization\Consumer\DrupalRolesConsumer
+   */
+  protected $consumer;
+
+  /**
+   * The profile.
+   *
+   * @var \Drupal\authorization\AuthorizationProfileInterface
+   */
+  protected $profile;
+
+  /**
+   * The transliteration.
+   *
+   * @var \Drupal\Component\Transliteration\TransliterationInterface
+   */
+  protected $transliteration;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The authorization Drupal roles.
+   *
+   * @var \Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface
+   */
+  protected $authorizationDrupalRoles;
 
   /**
    * {@inheritdoc}
@@ -73,11 +108,13 @@ class DrupalRolesConsumerTest extends UnitTestCase {
    */
   public function testStaticCreate() {
 
-    DrupalRolesConsumer::create(
+    $consumer = DrupalRolesConsumer::create(
       $this->container,
       [],
       'authorization_drupal_roles',
       []);
+
+    $this->assertInstanceOf(DrupalRolesConsumer::class, $consumer);
   }
 
   /**

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Kernel\Form;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
-use Drupal\authorization\Form\AuthorizationProfileEditForm;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
+use Drupal\authorization\Form\AuthorizationProfileEditForm;
 
 /**
  * Test Authorization Profile Add Form.
@@ -24,7 +24,7 @@ class AuthorizationProfileEditFormNoPluginsTest extends KernelTestBase {
   ];
 
   /**
-   * Test the profile edit form. No pligins installed.
+   * Test the profile edit form. No plugins installed.
    */
   public function testInvalidPlugins() {
     $profile = new AuthorizationProfile([

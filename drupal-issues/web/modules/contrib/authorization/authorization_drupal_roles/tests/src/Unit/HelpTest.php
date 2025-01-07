@@ -13,6 +13,8 @@ require_once __DIR__ . '/../../../authorization_drupal_roles.module';
 
 /**
  * Tests hook_help().
+ *
+ * @group authorization_drupal_roles
  */
 class HelpTest extends UnitTestCase {
 

@@ -7,7 +7,7 @@ configure: entity.authorization_profile.configuration_form
 dependencies:
   - externalauth:externalauth
 
-# Information added by Drupal.org packaging script on 2024-09-09
-version: '8.x-1.4'
+# Information added by Drupal.org packaging script on 2024-11-07
+version: '8.x-1.5'
 project: 'authorization'
-datestamp: 1725920421
+datestamp: 1731019648

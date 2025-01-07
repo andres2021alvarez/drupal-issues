@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\authorization\Unit\Service;
 
-use Drupal\authorization\AuthorizationProfileInterface;
-use Drupal\authorization\AuthorizationResponse;
-use Drupal\authorization\Service\AuthorizationService;
 use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization\AuthorizationResponse;
+use Drupal\authorization\Service\AuthorizationService;
 use Drupal\user\UserInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

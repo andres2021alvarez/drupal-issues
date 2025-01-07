@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Unit;
 
-use Drupal\authorization\AuthorizationProfileInterface;
-use Drupal\authorization\AuthorizationProfileListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization\AuthorizationProfileListBuilder;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -27,6 +27,27 @@ class AuthorizationProfileListBuilderTest extends UnitTestCase {
    * @var \Drupal\Core\Extension\ModuleHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $moduleHandler;
+
+  /**
+   * The entity type.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $entityType;
+
+  /**
+   * The storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $storage;
+
+  /**
+   * The list builder.
+   *
+   * @var \Drupal\authorization\AuthorizationProfileListBuilder
+   */
+  protected $listBuilder;
 
   /**
    * {@inheritdoc}

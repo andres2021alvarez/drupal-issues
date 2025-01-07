@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization_drupal_roles\Kernel;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -184,9 +184,9 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
     $result = $consumer->filterProposals($proposals, $consumerMapping);
     $this->assertEquals([], $result);
 
-    $consumer->createConsumerTarget('Complex ?targêt');
+    $consumer->createConsumerTarget('Complex ?target');
     $role = Role::load('complex_target');
-    self::assertEquals('Complex ?targêt', $role->label());
+    self::assertEquals('Complex ?target', $role->label());
   }
 
 }

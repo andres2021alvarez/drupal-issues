@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Unit\Form;
 
-use Drupal\authorization\Form\AuthorizationSettingsForm;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\Form\AuthorizationSettingsForm;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -19,6 +19,34 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @group authorization
  */
 class AuthorizationSettingsFormTest extends UnitTestCase {
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $configFactory;
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\Messenger|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $messenger;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $currentUser;
+
+  /**
+   * The form.
+   *
+   * @var \Drupal\authorization\Form\AuthorizationSettingsForm
+   */
+  protected $form;
 
   /**
    * {@inheritdoc}

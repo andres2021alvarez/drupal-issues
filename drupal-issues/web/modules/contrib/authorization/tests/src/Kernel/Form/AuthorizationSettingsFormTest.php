@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Kernel\Form;
 
-use Drupal\authorization\Form\AuthorizationSettingsForm;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\authorization\Form\AuthorizationSettingsForm;
 
 /**
  * Test Authorization Settings Form.

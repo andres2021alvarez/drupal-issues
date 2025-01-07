@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Kernel\Entity;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
 
 /**
  * Test Authorization Profile.
+ *
+ * @group authorization
  */
 class AuthorizationProfileTest extends EntityKernelTestBase {
 

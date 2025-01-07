@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\authorization_test\Plugin\authorization\Provider;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\authorization\AuthorizationSkipAuthorization;
 use Drupal\authorization\Provider\ProviderPluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\UserInterface;
 
 /**

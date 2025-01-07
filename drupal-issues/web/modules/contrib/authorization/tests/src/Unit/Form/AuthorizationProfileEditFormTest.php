@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Unit\Form;
 
-use Drupal\authorization\AuthorizationProfileInterface;
-use Drupal\authorization\Consumer\ConsumerInterface;
-use Drupal\authorization\Consumer\ConsumerPluginManager;
-use Drupal\authorization\Form\AuthorizationProfileEditForm;
-use Drupal\authorization\Provider\ProviderInterface;
-use Drupal\authorization\Provider\ProviderPluginManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -19,6 +13,12 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization\Consumer\ConsumerInterface;
+use Drupal\authorization\Consumer\ConsumerPluginManager;
+use Drupal\authorization\Form\AuthorizationProfileEditForm;
+use Drupal\authorization\Provider\ProviderInterface;
+use Drupal\authorization\Provider\ProviderPluginManager;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -27,6 +27,76 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @group authorization
  */
 class AuthorizationProfileEditFormTest extends UnitTestCase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\Messenger|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $messenger;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $currentUser;
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $configFactory;
+
+  /**
+   * The provider plugin manager.
+   *
+   * @var \Drupal\authorization\Provider\ProviderPluginManager|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $providerPluginManager;
+
+  /**
+   * The consumer plugin manager.
+   *
+   * @var \Drupal\authorization\Consumer\ConsumerPluginManager|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $consumerPluginManager;
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $moduleHandler;
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $renderer;
+
+  /**
+   * The profile.
+   *
+   * @var \Drupal\authorization\AuthorizationProfileInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $profile;
+
+  /**
+   * The form.
+   *
+   * @var \Drupal\authorization\Form\AuthorizationProfileEditForm
+   */
+  protected $form;
 
   /**
    * {@inheritdoc}
@@ -45,7 +115,7 @@ class AuthorizationProfileEditFormTest extends UnitTestCase {
     $this->configFactory = $this->createMock(ConfigFactoryInterface::class);
     $this->providerPluginManager = $this->createMock(ProviderPluginManager::class);
     $this->consumerPluginManager = $this->createMock(ConsumerPluginManager::class);
-    $this->moduleHander = $this->createMock(ModuleHandlerInterface::class);
+    $this->moduleHandler = $this->createMock(ModuleHandlerInterface::class);
     $this->renderer = $this->createMock(RendererInterface::class);
 
     $container->set('entity_type.manager', $this->entityTypeManager);
@@ -54,7 +124,7 @@ class AuthorizationProfileEditFormTest extends UnitTestCase {
     $container->set('config.factory', $this->configFactory);
     $container->set('plugin.manager.authorization.provider', $this->providerPluginManager);
     $container->set('plugin.manager.authorization.consumer', $this->consumerPluginManager);
-    $container->set('module_handler', $this->moduleHander);
+    $container->set('module_handler', $this->moduleHandler);
     $container->set('renderer', $this->renderer);
 
     \Drupal::setContainer($container);
@@ -108,7 +178,7 @@ class AuthorizationProfileEditFormTest extends UnitTestCase {
       ->method('getConsumerId')
       ->willReturn('consumer1');
 
-    $this->form->setModuleHandler($this->moduleHander);
+    $this->form->setModuleHandler($this->moduleHandler);
     $form = $this->form->buildForm($form, $form_state);
 
     $this->assertCount(12, $form);
@@ -192,7 +262,7 @@ class AuthorizationProfileEditFormTest extends UnitTestCase {
       ->method('getConsumer')
       ->willReturn($consumer);
 
-    $this->form->setModuleHandler($this->moduleHander);
+    $this->form->setModuleHandler($this->moduleHandler);
     $form = $this->form->form($form, $form_state);
 
     $this->assertCount(15, $form);

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\authorization\Kernel;
+namespace Drupal\Tests\authorization\Kernel\Service;
 
-use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\authorization\Entity\AuthorizationProfile;
 
 /**
  * Test description.

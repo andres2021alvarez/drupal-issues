@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization_drupal_roles\Unit;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -18,6 +19,8 @@ require_once __DIR__ . '/../../../authorization_drupal_roles.install';
  * Tests update 8004.
  *
  * Migrates roles from a field to user data service.
+ *
+ * @group authorization_drupal_roles
  */
 class Update8004Test extends UnitTestCase {
 
@@ -29,6 +32,13 @@ class Update8004Test extends UnitTestCase {
    * @var \Symfony\Component\DependencyInjection\ContainerInterface
    */
   protected $container;
+
+  /**
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
 
   /**
    * The entity type manager.
@@ -66,6 +76,13 @@ class Update8004Test extends UnitTestCase {
   protected $userData;
 
   /**
+   * The logger.
+   *
+   * @var \Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $logger;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp(): void {
@@ -78,6 +95,9 @@ class Update8004Test extends UnitTestCase {
 
     $this->definitionUpdateManager = $this->prophesize(EntityDefinitionUpdateManagerInterface::class);
     $this->container->set('entity.definition_update_manager', $this->definitionUpdateManager->reveal());
+
+    $this->database = $this->createMock(Connection::class);
+    $this->container->set('database', $this->database);
 
     $this->datetime = $this->prophesize('Drupal\Component\Datetime\TimeInterface');
     $this->container->set('datetime.time', $this->datetime->reveal());
@@ -192,25 +212,27 @@ class Update8004Test extends UnitTestCase {
       ->uninstallFieldStorageDefinition($definition->reveal())
       ->shouldBeCalled($this->once());
 
-    $query = $this->createMock('Drupal\Core\Entity\Query\QueryInterface');
-    $query->expects($this->once())
-      ->method('condition')
-      ->with('authorization_drupal_roles_roles', NULL, 'IS NOT NULL')
-      ->willReturnSelf();
-    $query->expects($this->once())
-      ->method('accessCheck')
-      ->with(FALSE)
-      ->willReturnSelf();
-    $query->expects($this->once())
-      ->method('execute')
+    $statement = $this->createMock('Drupal\Core\Database\StatementInterface');
+    $statement->expects($this->once())
+      ->method('fetchCol')
       ->willReturn([]);
-    $user_storage = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->entityTypeManager
-      ->getStorage('user')
-      ->willReturn($user_storage->reveal());
-    $user_storage
-      ->getQuery('AND')
-      ->willReturn($query);
+
+    $select = $this->createMock('Drupal\Core\Database\Query\SelectInterface');
+    $select->expects($this->once())
+      ->method('fields')
+      ->with('ur', ['entity_id'])
+      ->willReturnSelf();
+    $select->expects($this->once())
+      ->method('distinct')
+      ->willReturnSelf();
+    $select->expects($this->once())
+      ->method('execute')
+      ->willReturn($statement);
+
+    $this->database->expects($this->once())
+      ->method('select')
+      ->with('user__authorization_drupal_roles_roles', 'ur')
+      ->willReturn($select);
 
     $sandbox = [];
     authorization_drupal_roles_update_8004($sandbox);
@@ -256,25 +278,27 @@ class Update8004Test extends UnitTestCase {
       ->willReturn($definition->reveal())
       ->shouldBeCalled($this->once());
 
-    $query = $this->createMock('Drupal\Core\Entity\Query\QueryInterface');
-    $query->expects($this->once())
-      ->method('condition')
-      ->with('authorization_drupal_roles_roles', NULL, 'IS NOT NULL')
-      ->willReturnSelf();
-    $query->expects($this->once())
-      ->method('accessCheck')
-      ->with(FALSE)
-      ->willReturnSelf();
-    $query->expects($this->once())
-      ->method('execute')
+    $statement = $this->createMock('Drupal\Core\Database\StatementInterface');
+    $statement->expects($this->once())
+      ->method('fetchCol')
       ->willReturn([1, 2, 3]);
-    $user_storage = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->entityTypeManager
-      ->getStorage('user')
-      ->willReturn($user_storage->reveal());
-    $user_storage
-      ->getQuery('AND')
-      ->willReturn($query);
+
+    $select = $this->createMock('Drupal\Core\Database\Query\SelectInterface');
+    $select->expects($this->once())
+      ->method('fields')
+      ->with('ur', ['entity_id'])
+      ->willReturnSelf();
+    $select->expects($this->once())
+      ->method('distinct')
+      ->willReturnSelf();
+    $select->expects($this->once())
+      ->method('execute')
+      ->willReturn($statement);
+
+    $this->database->expects($this->once())
+      ->method('select')
+      ->with('user__authorization_drupal_roles_roles', 'ur')
+      ->willReturn($select);
 
     $sandbox = [];
     authorization_drupal_roles_update_8004($sandbox);
@@ -292,7 +316,7 @@ class Update8004Test extends UnitTestCase {
   /**
    * Tests update 8004, with two profiles and three users. 2nd iteration.
    */
-  public function testTwoProfilesAndThreeUserAllInterations() {
+  public function testTwoProfilesAndThreeUserAllIterations() {
     $sandbox = [
       'profiles' => [
         'profile_a' => ['role1'],
@@ -316,21 +340,15 @@ class Update8004Test extends UnitTestCase {
     $user2->hasRole('role1')
       ->willReturn(TRUE)
       ->shouldBeCalled($this->once());
-    $user2->hasRole('role2')
-      ->willReturn(FALSE)
-      ->shouldBeCalled($this->once());
+
     $user3 = $this->prophesize('Drupal\user\UserInterface');
     $user3->get('authorization_drupal_roles_roles')->willReturn(['role1', 'role2']);
     $user3->hasRole('role1')
       ->willReturn(TRUE)
       ->shouldBeCalled($this->once());
-    $user3->hasRole('role2')
-      ->willReturn(TRUE)
-      ->shouldBeCalled($this->once());
 
     $this->userData->set('authorization_drupal_roles', 3, 'roles', [
       'role1' => 'profile_a',
-      'role2' => 'profile_b',
     ])
       ->shouldBeCalled($this->once());
 
@@ -368,6 +386,27 @@ class Update8004Test extends UnitTestCase {
       ->uninstallFieldStorageDefinition($definition->reveal())
       ->shouldBeCalled($this->once());
 
+    $statement = $this->createMock('Drupal\Core\Database\StatementInterface');
+    $statement->expects($this->exactly(3))
+      ->method('fetchCol')
+      ->willReturnOnConsecutiveCalls(['role1'], ['role1'], ['role1', 'role2']);
+
+    $select = $this->createMock('Drupal\Core\Database\Query\SelectInterface');
+    $select->expects($this->exactly(3))
+      ->method('fields')
+      ->with('ur', ['authorization_drupal_roles_roles_value'])
+      ->willReturnSelf();
+    $select->expects($this->exactly(6))
+      ->method('condition')
+      ->willReturnSelf();
+    $select->expects($this->exactly(3))
+      ->method('execute')
+      ->willReturn($statement);
+
+    $this->database->expects($this->exactly(3))
+      ->method('select')
+      ->willReturn($select);
+
     $sandbox['current'] = 1;
     authorization_drupal_roles_update_8004($sandbox);
 
@@ -388,7 +427,7 @@ class Update8004Test extends UnitTestCase {
   /**
    * Tests update 8004, with two profiles and three users. 2nd iteration.
    */
-  public function testTwoProfilesAndThreeUserOneInteration() {
+  public function testTwoProfilesAndThreeUserOneIteration() {
     $sandbox = [
       'profiles' => [
         'profile1' => ['role1', 'role2'],
@@ -403,13 +442,9 @@ class Update8004Test extends UnitTestCase {
     $user3->hasRole('role1')
       ->willReturn(TRUE)
       ->shouldBeCalled($this->once());
-    $user3->hasRole('role2')
-      ->willReturn(TRUE)
-      ->shouldBeCalled($this->once());
 
     $this->userData->set('authorization_drupal_roles', 3, 'roles', [
       'role1' => 'profile1',
-      'role2' => 'profile1',
     ])
       ->shouldBeCalled($this->once());
 
@@ -425,10 +460,31 @@ class Update8004Test extends UnitTestCase {
     $this->datetime->getRequestTime()->willReturn(100);
     $this->datetime->getCurrentTime()->willReturn(200);
 
+    $statement = $this->createMock('Drupal\Core\Database\StatementInterface');
+    $statement->expects($this->once())
+      ->method('fetchCol')
+      ->willReturnOnConsecutiveCalls(['role1'], ['role1'], ['role1', 'role2']);
+
+    $select = $this->createMock('Drupal\Core\Database\Query\SelectInterface');
+    $select->expects($this->once())
+      ->method('fields')
+      ->with('ur', ['authorization_drupal_roles_roles_value'])
+      ->willReturnSelf();
+    $select->expects($this->exactly(2))
+      ->method('condition')
+      ->willReturnSelf();
+    $select->expects($this->once())
+      ->method('execute')
+      ->willReturn($statement);
+
+    $this->database->expects($this->once())
+      ->method('select')
+      ->willReturn($select);
+
     $sandbox['current'] = 1;
     authorization_drupal_roles_update_8004($sandbox);
 
-    $this->assertEquals((1 / 3), $sandbox['#finished']);
+    $this->assertEquals((2 / 3), $sandbox['#finished']);
     $this->assertArrayHasKey('profiles', $sandbox);
     $this->assertCount(1, $sandbox['profiles']);
     $this->assertArrayHasKey('profile1', $sandbox['profiles']);

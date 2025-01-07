@@ -4,19 +4,49 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Unit\Form;
 
-use Drupal\authorization\AuthorizationProfileInterface;
-use Drupal\authorization\Form\AuthorizationProfileDeleteForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization\Form\AuthorizationProfileDeleteForm;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests AuthorizationProfileDeleteForm.
+ *
+ * @group authorization
  */
 class AuthorizationProfileDeleteFormTest extends UnitTestCase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\Messenger|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $messenger;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $currentUser;
+
+  /**
+   * The form.
+   *
+   * @var \Drupal\authorization\Form\AuthorizationProfileDeleteForm
+   */
+  protected $form;
 
   /**
    * {@inheritdoc}

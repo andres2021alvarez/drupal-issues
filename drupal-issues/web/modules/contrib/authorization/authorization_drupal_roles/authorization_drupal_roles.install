@@ -57,11 +57,11 @@ function authorization_drupal_roles_update_8004(&$sandbox) {
     }
 
     $sandbox['current'] = 0;
-    $query = \Drupal::entityQuery('user');
-    $sandbox['user_ids'] = $query
-      ->condition('authorization_drupal_roles_roles', NULL, 'IS NOT NULL')
-      ->accessCheck(FALSE)
-      ->execute();
+    $sandbox['user_ids'] = \Drupal::database()->select('user__authorization_drupal_roles_roles', 'ur')
+      ->fields('ur', ['entity_id'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
 
     $sandbox['total'] = count($sandbox['user_ids']);
 
@@ -81,13 +81,20 @@ function authorization_drupal_roles_update_8004(&$sandbox) {
   }
   $user_storage = \Drupal::entityTypeManager()->getStorage('user');
   $start = \Drupal::time()->getRequestTime();
+  $now = \Drupal::time()->getRequestTime();
   $user_service = \Drupal::service('user.data');
+  $database = \Drupal::service('database');
 
-  do {
+  while (30 > ($now - $start) && !empty($sandbox['user_ids'])) {
     $user_id = array_pop($sandbox['user_ids']);
     $sandbox['current'] += 1;
     $user = $user_storage->load($user_id);
-    $drupal_roles = $user->get('authorization_drupal_roles_roles');
+    $drupal_roles = $database->select('user__authorization_drupal_roles_roles', 'ur')
+      ->fields('ur', ['authorization_drupal_roles_roles_value'])
+      ->condition('entity_id', $user_id)
+      ->condition('bundle', 'user')
+      ->execute()
+      ->fetchCol();
     $roles = [];
     foreach ($drupal_roles as $role) {
       if (!$user->hasRole($role)) {
@@ -114,7 +121,7 @@ function authorization_drupal_roles_update_8004(&$sandbox) {
     }
 
     $now = \Drupal::time()->getCurrentTime();
-  } while (30 > ($now - $start) && !empty($sandbox['user_ids']));
+  }
 
   if (empty($sandbox['user_ids'])) {
     $update_manager = \Drupal::entityDefinitionUpdateManager();
@@ -122,6 +129,5 @@ function authorization_drupal_roles_update_8004(&$sandbox) {
     $update_manager->uninstallFieldStorageDefinition($definition);
   }
 
-  $finished = ($sandbox['current'] - 1) / $sandbox['total'];
-  $sandbox['#finished'] = $finished;
+  $sandbox['#finished'] = empty($sandbox['user_ids']) ? 1 : $sandbox['current'] / $sandbox['total'];
 }

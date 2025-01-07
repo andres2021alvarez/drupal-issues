@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization\Unit\Entity;
 
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\authorization\AuthorizationSkipAuthorization;
 use Drupal\authorization\Consumer\ConsumerInterface;
 use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\authorization\Provider\ProviderInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -35,6 +35,13 @@ class AuthorizationProfileTest extends UnitTestCase {
    * @var \Drupal\authorization\Consumer\ConsumerPluginManager|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $consumerPlugin;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $entityTypeManager;
 
   /**
    * {@inheritdoc}

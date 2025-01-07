@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Form;
 
-use Drupal\authorization\Consumer\ConsumerPluginManager;
-use Drupal\authorization\Provider\ProviderPluginManager;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\authorization\Consumer\ConsumerPluginManager;
+use Drupal\authorization\Provider\ProviderPluginManager;
 
 /**
  * Authorization profile form.

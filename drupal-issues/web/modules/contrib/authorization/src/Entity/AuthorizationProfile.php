@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Entity;
 
+use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\authorization\AuthorizationProfileInterface;
 use Drupal\authorization\AuthorizationResponse;
 use Drupal\authorization\AuthorizationSkipAuthorization;
 use Drupal\authorization\Consumer\ConsumerInterface;
 use Drupal\authorization\Provider\ProviderInterface;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\UserInterface;
 
 /**

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Service;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\authorization\AuthorizationProfileInterface;
 use Drupal\authorization\AuthorizationServiceInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 
@@ -51,7 +51,7 @@ class AuthorizationService implements AuthorizationServiceInterface {
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
-    LoggerInterface $logger_channel_authorization
+    LoggerInterface $logger_channel_authorization,
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_channel_authorization;

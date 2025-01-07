@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\authorization_drupal_roles\Unit;
 
-use Drupal\authorization_drupal_roles\Service\AuthorizationDrupalRolesService;
 use Drupal\Tests\UnitTestCase;
+use Drupal\authorization_drupal_roles\Service\AuthorizationDrupalRolesService;
 use Drupal\user\UserDataInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -24,6 +24,20 @@ class AuthorizationDrupalRolesServiceTest extends UnitTestCase {
    * @var \Symfony\Component\DependencyInjection\ContainerInterface
    */
   protected $container;
+
+  /**
+   * The service.
+   *
+   * @var \Drupal\authorization_drupal_roles\Service\AuthorizationDrupalRolesService
+   */
+  protected $service;
+
+  /**
+   * The user data.
+   *
+   * @var \Drupal\user\UserDataInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $userData;
 
   /**
    * {@inheritdoc}
