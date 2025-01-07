@@ -5,15 +5,13 @@ namespace Drupal\content_sync\Encoder;
 use Drupal\Component\Serialization\Yaml;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
-use Symfony\Component\Serializer\Encoder\scalar;
-
 
 /**
- * Class YamlEncoder.
+ * Yaml Encoder.
  *
  * @package Drupal\yaml_serialization
  */
-class YamlEncoder implements EncoderInterface, DecoderInterface{
+class YamlEncoder implements EncoderInterface, DecoderInterface {
 
   /**
    * The formats that this Encoder supports.
@@ -22,6 +20,11 @@ class YamlEncoder implements EncoderInterface, DecoderInterface{
    */
   protected $format = 'yaml';
 
+  /**
+   * The encoding type that this Encoder supports.
+   *
+   * @var mixed
+   */
   protected $yaml;
 
   /**
@@ -31,19 +34,32 @@ class YamlEncoder implements EncoderInterface, DecoderInterface{
     $this->yaml = $yaml;
   }
 
-  public function decode($data, $format, array $context = array()) {
+  /**
+   * Decode a YAML string.
+   */
+  public function decode($data, $format, array $context = []) {
     return $this->yaml->decode($data);
   }
 
+  /**
+   * Supports array syntax for arrays.
+   */
   public function supportsDecoding($format) {
     return $format == $this->format;
   }
 
-  public function encode(mixed $data, string $format, array $context = array()): string {
+  /**
+   * Encode array using yaml encoding.
+   */
+  public function encode(mixed $data, string $format, array $context = []): string {
     return $this->yaml->encode($data);
   }
 
+  /**
+   * Supports encoding with string encoding.
+   */
   public function supportsEncoding(string $format): bool {
     return $format == $this->format;
   }
+
 }

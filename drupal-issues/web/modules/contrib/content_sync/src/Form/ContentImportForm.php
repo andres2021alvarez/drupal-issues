@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
  * Defines the content import form.
  */
 class ContentImportForm extends FormBase {
+
   /**
    * {@inheritdoc}
    */
@@ -83,27 +84,32 @@ class ContentImportForm extends FormBase {
       unlink($path);
     }
   }
+
 }
 
-/*
- * Help to empty a directory
+/**
+ * Help to empty a directory.
  */
-function emptyDirectory($dirname,$self_delete=false) {
-   if (is_dir($dirname))
-      $dir_handle = opendir($dirname);
-   if (!$dir_handle)
-      return false;
-   while($file = readdir($dir_handle)) {
-      if ($file != "." && $file != "..") {
-         if (!is_dir($dirname."/".$file))
-            @unlink($dirname."/".$file);
-         else
-            emptyDirectory($dirname.'/'.$file,true);
+function emptyDirectory($dirname, $self_delete = FALSE) {
+  if (is_dir($dirname)) {
+    $dir_handle = opendir($dirname);
+  }
+  if (!$dir_handle) {
+    return FALSE;
+  }
+  while ($file = readdir($dir_handle)) {
+    if ($file != "." && $file != "..") {
+      if (!is_dir($dirname . "/" . $file)) {
+        @unlink($dirname . "/" . $file);
       }
-   }
-   closedir($dir_handle);
-   if ($self_delete){
-        @rmdir($dirname);
-   }
-   return true;
+      else {
+        emptyDirectory($dirname . '/' . $file, TRUE);
+      }
+    }
+  }
+  closedir($dir_handle);
+  if ($self_delete) {
+    @rmdir($dirname);
+  }
+  return TRUE;
 }

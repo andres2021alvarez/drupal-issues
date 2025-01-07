@@ -2,13 +2,13 @@
 
 namespace Drupal\content_sync\Form;
 
-use Drupal\content_sync\ContentSyncManagerInterface;
-use Drupal\content_sync\Exporter\ContentExporterInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\content_sync\ContentSyncManagerInterface;
+use Drupal\content_sync\Exporter\ContentExporterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -38,7 +38,6 @@ class ContentExportForm extends FormBase {
    */
   protected $fileSystem;
 
-
   /**
    * ContentExportForm constructor.
    */
@@ -49,6 +48,9 @@ class ContentExportForm extends FormBase {
     $this->fileSystem = $file_system;
   }
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
@@ -83,16 +85,16 @@ class ContentExportForm extends FormBase {
     // Delete the content tar file in case an older version exist.
     $this->fileSystem->delete($this->getTempFile());
 
-    //Set batch operations by entity type/bundle
+    // Set batch operations by entity type/bundle.
     $entities_list = [];
     $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($entity_type_definitions as $entity_type => $definition) {
       $reflection = new \ReflectionClass($definition->getClass());
       if ($reflection->implementsInterface(ContentEntityInterface::class)) {
         $entities = $this->entityTypeManager->getStorage($entity_type)
-                                            ->getQuery()
-                                            ->accessCheck(FALSE)
-                                            ->execute();
+          ->getQuery()
+          ->accessCheck(FALSE)
+          ->execute();
         foreach ($entities as $entity_id) {
           $entities_list[] = [
             'entity_type' => $entity_type,
@@ -109,17 +111,20 @@ class ContentExportForm extends FormBase {
     }
   }
 
+  /**
+   *
+   */
   public function snapshot() {
-    //Set batch operations by entity type/bundle
+    // Set batch operations by entity type/bundle.
     $entities_list = [];
     $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($entity_type_definitions as $entity_type => $definition) {
       $reflection = new \ReflectionClass($definition->getClass());
       if ($reflection->implementsInterface(ContentEntityInterface::class)) {
         $entities = $this->entityTypeManager->getStorage($entity_type)
-                                            ->getQuery()
-                                            ->accessCheck(FALSE)
-                                            ->execute();
+          ->getQuery()
+          ->accessCheck(FALSE)
+          ->execute();
         foreach ($entities as $entity_id) {
           $entities_list[] = [
             'entity_type' => $entity_type,

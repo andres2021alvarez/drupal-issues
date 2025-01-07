@@ -2,12 +2,12 @@
 
 namespace Drupal\content_sync\Normalizer;
 
-use Drupal\Core\Url;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
+use Drupal\Core\Url;
 use Drupal\content_sync\ContentSyncManager;
 use Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager;
 
@@ -39,14 +39,15 @@ class PathAliasEntityNormalizer extends ContentEntityNormalizer {
    *   The entity type repository.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
-   * @param SyncNormalizerDecoratorManager $decorator_manager
-   * @param EntityRepositoryInterface $entityRepository
+   * @param \Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager $decorator_manager
+   *   Plugin manager content sync normalizer.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
+   *   The entity type Repository.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeRepositoryInterface $entity_type_repository, EntityFieldManagerInterface $entity_field_manager, SyncNormalizerDecoratorManager $decorator_manager, EntityRepositoryInterface $entityRepository) {
     parent::__construct($entity_type_manager, $entity_type_repository, $entity_field_manager, $decorator_manager);
     $this->entityRepository = $entityRepository;
   }
-
 
   /**
    * {@inheritdoc}
@@ -87,18 +88,18 @@ class PathAliasEntityNormalizer extends ContentEntityNormalizer {
             $target_uuid,
           ];
           $dependency = implode(ContentSyncManager::DELIMITER, $ids);
-          // Add the target entity UUID and type to the normalized output values.
+          // The target entity UUID and type to the normalized output values.
           $normalized_data['path']['target_type'] = $target_type;
           $normalized_data['path']['target_uuid'] = $target_uuid;
-          // Include a dependency
+          // Include a dependency.
           $normalized_data['_content_sync']['entity_dependencies'][$target_type][] = $dependency;
           // Remove target revision id as we are not syncing revisions.
-          if (isset($normalized_data['revision_id'])){
+          if (isset($normalized_data['revision_id'])) {
             unset($normalized_data['revision_id']);
             unset($normalized_data['revision_default']);
             unset($normalized_data['isDefaultRevision']);
           }
-          // Remove main property - we set target_uuid
+          // Remove main property - we set target_uuid.
           if (!empty($normalized_data['path'][0])) {
             unset($normalized_data['path'][0]);
           }
@@ -112,4 +113,5 @@ class PathAliasEntityNormalizer extends ContentEntityNormalizer {
     }
     return $normalized_data;
   }
+
 }

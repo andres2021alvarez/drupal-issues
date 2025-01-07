@@ -5,26 +5,27 @@ namespace Drupal\content_sync\DependencyResolver;
 use Drupal\Core\Serialization\Yaml;
 
 /**
- * Class ImportQueueResolver.
- *
- * @package Drupal\content_sync\DependencyResolver
+ * Import Queue Resolver.
  */
 class ImportQueueResolver implements ContentSyncResolverInterface {
 
   /**
    * The normalized data.
+   *
    * @var array
    */
   protected $normalizedEntities;
 
   /**
    * Entities with references to ancestors.
+   *
    * @var array
    */
   protected $rebuild;
 
   /**
    * Queue variable.
+   *
    * @var array
    */
   protected $q;
@@ -94,7 +95,7 @@ class ImportQueueResolver implements ContentSyncResolverInterface {
   public function getDependencies($entity) {
     $dependencies = [];
     if (!empty($entity['_content_sync']['entity_dependencies'])) {
-      foreach ($entity['_content_sync']['entity_dependencies'] as $ref_entity_type_id => $references) {
+      foreach ($entity['_content_sync']['entity_dependencies'] as $references) {
         $dependencies = array_merge($dependencies, $references);
       }
     }
@@ -113,8 +114,8 @@ class ImportQueueResolver implements ContentSyncResolverInterface {
     }
     catch (\Exception $e) {
       $entity = [];
-      // TODO: notice/log of what entity is missing.
-      // TODO: should the import of the parent entity abort?
+      // @todo notice/log of what entity is missing.
+      // @todo should the import of the parent entity abort?
     }
     return $entity;
   }
@@ -122,13 +123,13 @@ class ImportQueueResolver implements ContentSyncResolverInterface {
   /**
    * Gets an entity.
    *
-   * @param $identifier
+   * @param string $identifier
    *   An entity identifier to process.
-   * @param $normalized_entities
+   * @param mixed $normalized_entities
    *   An array of entity identifiers to process.
    *
    * @return bool|mixed
-   *   Decoded entity or FALSE if an entity already exists and doesn't require to be imported.
+   *   Decoded entity or FALSE if an entity already exists
    *
    * @throws \Exception
    */
@@ -139,7 +140,7 @@ class ImportQueueResolver implements ContentSyncResolverInterface {
     }
     else {
       // Check the entity in the content directory.
-      [$entity_type_id, $bundle, $uuid] = explode('.', $identifier);
+      [$entity_type_id, $bundle] = explode('.', $identifier);
       $file_path = content_sync_get_content_directory('sync') . "/entities/" . $entity_type_id . "/" . $bundle . "/" . $identifier . ".yml";
       $raw_entity = file_get_contents($file_path);
 
@@ -151,28 +152,23 @@ class ImportQueueResolver implements ContentSyncResolverInterface {
       $entity = Yaml::decode($raw_entity);
     }
 
-    // TODO: else if Check the entity exists in the snapshot
-
-    // TODO: else if Check if the entity exist in the site.
-
-    // TODO: better notice about missing dependency
-    //       - should the parent import be aborted or not?
-
     return $entity;
   }
 
   /**
    * Checks if a dependency exists in the site.
    *
-   * @param $identifier
+   * @param string $identifier
    *   An entity identifier to process.
    *
    * @return bool
+   *   Decoded entity or FALSE if an entity already exists
    */
   protected function entityExists($identifier) {
     return (bool) \Drupal::database()
       ->queryRange('SELECT 1 FROM {cs_db_snapshot} WHERE name = :name', 0, 1, [
-        ':name' => $identifier])
+        ':name' => $identifier,
+      ])
       ->fetchField();
   }
 

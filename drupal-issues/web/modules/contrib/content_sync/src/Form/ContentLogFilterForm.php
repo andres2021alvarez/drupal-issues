@@ -21,8 +21,7 @@ class ContentLogFilterForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    //$filters = cs_log_filters();
-
+    // $filters = cs_log_filters();
     $form['filters'] = [
       '#type' => 'details',
       '#title' => $this->t('Filter log messages'),

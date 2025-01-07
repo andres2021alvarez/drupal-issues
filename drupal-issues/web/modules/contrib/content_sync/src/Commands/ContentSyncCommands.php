@@ -2,11 +2,6 @@
 
 namespace Drupal\content_sync\Commands;
 
-use Drupal\content_sync\Content\ContentStorageComparer;
-use Drupal\content_sync\ContentSyncManagerInterface;
-use Drupal\content_sync\Exporter\ContentExporterInterface;
-use Drupal\content_sync\Form\ContentExportTrait;
-use Drupal\content_sync\Form\ContentImportTrait;
 use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
@@ -18,6 +13,11 @@ use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\content_sync\Content\ContentStorageComparer;
+use Drupal\content_sync\ContentSyncManagerInterface;
+use Drupal\content_sync\Exporter\ContentExporterInterface;
+use Drupal\content_sync\Form\ContentExportTrait;
+use Drupal\content_sync\Form\ContentImportTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Exceptions\UserAbortException;
 use Symfony\Component\Console\Helper\Table;
@@ -45,7 +45,7 @@ class ContentSyncCommands extends DrushCommands {
   /**
    * The configuration manager.
    *
-   * @var \Drupal\Core\Config\ConfigManagerInterface;
+   * @var \Drupal\Core\Config\ConfigManagerInterface
    */
   protected $configManager;
 
@@ -254,14 +254,18 @@ class ContentSyncCommands extends DrushCommands {
    * @usage drush content-sync-import.
    * @aliases csi,content-sync-import
    */
-  public function import($label = NULL, array $options = [
-    'entity-types' => '',
-    'uuids' => '',
-    'actions' => '',
-    'skiplist' => FALSE,
-    'compare-dates' => FALSE ]) {
+  public function import(
+    $label = NULL,
+    array $options = [
+      'entity-types' => '',
+      'uuids' => '',
+      'actions' => '',
+      'skiplist' => FALSE,
+      'compare-dates' => FALSE,
+    ],
+  ) {
 
-    //Generate comparer with filters.
+    // Generate comparer with filters.
     $storage_comparer = new ContentStorageComparer($this->contentStorageSync, $this->contentStorage);
     $change_list = [];
     $collections = $storage_comparer->getAllCollectionNames();
@@ -277,9 +281,11 @@ class ContentSyncCommands extends DrushCommands {
     foreach ($collections as $collection) {
       if (!empty($options['uuids'])) {
         $storage_comparer->createChangelistbyCollectionAndNames($collection, $options['uuids']);
-      } elseif ($options['compare-dates']) {
-          $storage_comparer->createChangelistbyCollection($collection, TRUE);
-      } else {
+      }
+      elseif ($options['compare-dates']) {
+        $storage_comparer->createChangelistbyCollection($collection, TRUE);
+      }
+      else {
         $storage_comparer->createChangelistbyCollection($collection);
       }
       if (!empty($options['actions'])) {
@@ -300,13 +306,13 @@ class ContentSyncCommands extends DrushCommands {
 
     // Display the change list.
     if (empty($options['skiplist'])) {
-      //Show differences
+      // Show differences.
       $this->output()
         ->writeln("Differences of the export directory to the active content:\n");
       // Print a table with changes in color.
       $table = self::contentChangesTable($change_list, $this->output());
       $table->render();
-      // Ask to continue
+      // Ask to continue.
       if (!$this->io()
         ->confirm(dt('Do you want to import?'))) {
         throw new UserAbortException();
@@ -327,7 +333,7 @@ class ContentSyncCommands extends DrushCommands {
         $content_to_delete = $actions['delete'];
       }
     }
-    // Set the Import Batch
+    // Set the Import Batch.
     if (!empty($content_to_sync) || !empty($content_to_delete)) {
       $batch = $this->generateImportBatch($content_to_sync,
         $content_to_delete);
@@ -342,7 +348,6 @@ class ContentSyncCommands extends DrushCommands {
    * @param string|null $label
    *   A content directory label (i.e. a key in $content_directories array in
    *   settings.php).
-   *
    * @param array $options
    *   The command options.
    *
@@ -357,14 +362,18 @@ class ContentSyncCommands extends DrushCommands {
    * @usage drush content-sync-export.
    * @aliases cse,content-sync-export.
    */
-  public function export($label = NULL, array $options = [
-    'entity-types' => '',
-    'uuids' => '',
-    'actions' => '',
-    'files' => '',
-    'include-dependencies' => FALSE,
-    'skiplist' => FALSE,
-    'compare-dates' => FALSE ]) {
+  public function export(
+    $label = NULL,
+    array $options = [
+      'entity-types' => '',
+      'uuids' => '',
+      'actions' => '',
+      'files' => '',
+      'include-dependencies' => FALSE,
+      'skiplist' => FALSE,
+      'compare-dates' => FALSE,
+    ],
+  ) {
 
     // Generate comparer with filters.
     $storage_comparer = new ContentStorageComparer($this->contentStorage, $this->contentStorageSync);
@@ -392,9 +401,11 @@ class ContentSyncCommands extends DrushCommands {
             $change_list[$collection][$op] = $storage_comparer->getChangelist($op, $collection);
           }
         }
-      } elseif ($options['compare-dates']) {
-          $storage_comparer->createChangelistbyCollection($collection, TRUE);
-      } else {
+      }
+      elseif ($options['compare-dates']) {
+        $storage_comparer->createChangelistbyCollection($collection, TRUE);
+      }
+      else {
         $change_list[$collection] = $storage_comparer->getChangelist(NULL, $collection);
       }
       $change_list = array_map('array_filter', $change_list);
@@ -420,7 +431,7 @@ class ContentSyncCommands extends DrushCommands {
     // Process the Export.
     $entities_list = [];
     foreach ($change_list as $collection => $changes) {
-      //$storage_comparer->getTargetStorage($collection)->deleteAll();
+      // $storage_comparer->getTargetStorage($collection)->deleteAll();
       foreach ($changes as $change => $contents) {
         switch ($change) {
           case 'delete':
@@ -429,11 +440,10 @@ class ContentSyncCommands extends DrushCommands {
                 ->delete($content);
             }
             break;
+
           case 'update':
           case 'create':
             foreach ($contents as $content) {
-              //$data = $storage_comparer->getSourceStorage($collection)->read($content);
-              //$storage_comparer->getTargetStorage($collection)->write($content, $data);
               $entity = explode('.', $content);
               $entities_list[] = [
                 'entity_type' => $entity[0],
@@ -523,12 +533,15 @@ class ContentSyncCommands extends DrushCommands {
    *
    * @param array $options
    *   The command options.
+   *
    * @return string
    *   Processed 'files' option value.
    */
   public static function processFilesOption($options) {
     $include_files = !empty($options['files']) ? $options['files'] : 'folder';
-    if (!in_array($include_files, ['folder', 'base64'])) $include_files = 'none';
+    if (!in_array($include_files, ['folder', 'base64'])) {
+      $include_files = 'none';
+    }
     return $include_files;
   }
 

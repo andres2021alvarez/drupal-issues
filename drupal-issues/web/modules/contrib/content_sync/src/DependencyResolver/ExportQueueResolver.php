@@ -13,12 +13,14 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
 
   /**
    * The normalized data.
+   *
    * @var array
    */
   protected $normalizedEntities;
 
   /**
    * Queue variable.
+   *
    * @var array
    */
   protected $visited;
@@ -54,7 +56,7 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
 
       // Process dependencies first.
       if (!empty($entity['_content_sync']['entity_dependencies'])) {
-        foreach ($entity['_content_sync']['entity_dependencies'] as $ref_entity_type_id => $references) {
+        foreach ($entity['_content_sync']['entity_dependencies'] as $references) {
           $this->depthFirstSearch($visited, $references, $normalized_entities);
         }
       }
@@ -63,7 +65,7 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
       if (!empty($entity["_translations"])) {
         foreach ($entity["_translations"] as $translation) {
           if (!empty($translation['_content_sync']['entity_dependencies'])) {
-            foreach ($translation['_content_sync']['entity_dependencies'] as $ref_entity_type_id => $references) {
+            foreach ($translation['_content_sync']['entity_dependencies'] as $references) {
               $this->depthFirstSearch($visited, $references, $normalized_entities);
             }
           }
@@ -71,7 +73,7 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
       }
 
       if (!isset($visited[$identifier])) {
-        [$entity_type_id, $bundle, $uuid] = explode('.', $identifier);
+        [$entity_type_id, $uuid] = explode('.', $identifier);
         $visited[$identifier] = [
           'entity_type' => $entity_type_id,
           'entity_uuid' => $uuid,
@@ -84,9 +86,9 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
   /**
    * Gets an entity.
    *
-   * @param $identifier
+   * @param string $identifier
    *   An entity identifier to process.
-   * @param $normalized_entities
+   * @param mixed $normalized_entities
    *   An array of entity identifiers to process.
    *
    * @return bool|array
@@ -98,16 +100,13 @@ class ExportQueueResolver implements ContentSyncResolverInterface {
     }
     else {
       $activeStorage = new ContentDatabaseStorage(\Drupal::database(), 'cs_db_snapshot');
-      $entity = $activeStorage->cs_read($identifier);
+      $entity = $activeStorage->csRead($identifier);
     }
     return $entity;
   }
 
   /**
    * Creates a queue.
-   *
-   * @param array $normalized_entities
-   *   Parsed entities to import.
    *
    * @return array
    *   Queue to be processed within a batch process.

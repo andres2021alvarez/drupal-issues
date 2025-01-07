@@ -2,11 +2,11 @@
 
 namespace Drupal\content_sync\Normalizer;
 
-use Drupal\content_sync\ContentSyncManager;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\content_sync\ContentSyncManager;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 use Drupal\serialization\Normalizer\FieldItemNormalizer;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
@@ -23,7 +23,6 @@ class LinkItemNormalizer extends FieldItemNormalizer {
    * @var string
    */
   protected $supportedInterfaceOrClass = LinkItem::class;
-  //protected $supportedInterfaceOrClass = 'Drupal\link\Plugin\Field\FieldType\LinkItem';
 
   /**
    * The entity repository.
@@ -33,6 +32,8 @@ class LinkItemNormalizer extends FieldItemNormalizer {
   protected $entityRepository;
 
   /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
@@ -42,6 +43,8 @@ class LinkItemNormalizer extends FieldItemNormalizer {
    *
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
   public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeManagerInterface $entity_type_manager) {
     $this->entityRepository = $entity_repository;
@@ -71,16 +74,12 @@ class LinkItemNormalizer extends FieldItemNormalizer {
             $target_uuid,
           ];
           $dependency = implode(ContentSyncManager::DELIMITER, $ids);
-          // Add the target entity UUID and type to the normalized output values.
           $values['target_type'] = $target_type;
           $values['target_uuid'] = $target_uuid;
-          // Include a dependency
           $values['dependencies'][$target_type][] = $dependency;
-          // Remove target revision id as we are not syncing revisions.
-          if (isset($values['target_revision_id'])){
+          if (isset($values['target_revision_id'])) {
             unset($values['target_revision_id']);
           }
-          // Remove main property - we set target_uuid
           $key = $field_item->mainPropertyName();
           if (!empty($values[$key])) {
             unset($values[$key]);
@@ -124,7 +123,8 @@ class LinkItemNormalizer extends FieldItemNormalizer {
               $uri = "entity:{$entity_type_id}/" . $url->getRouteParameters()[$entity_type_id];
             }
           }
-        }else{
+        }
+        else {
           $uri = $url->getUri();
         }
         $key = $field_item->mainPropertyName();
@@ -135,12 +135,10 @@ class LinkItemNormalizer extends FieldItemNormalizer {
         return $data;
       }
       else {
-        // Unable to load entity by uuid.
-        // TODO: change Error to Log/Warning - to avoid stoping the import of the rest of the entities.   ---> Same for throws above.
-        //throw new InvalidArgumentException(sprintf('No "%s" entity found with UUID "%s" for field "%s".', $data['target_type'], $data['target_uuid'], $field_item->getName()));
-        return[];
+        return [];
       }
     }
     return parent::constructValue($data, $context);
   }
+
 }

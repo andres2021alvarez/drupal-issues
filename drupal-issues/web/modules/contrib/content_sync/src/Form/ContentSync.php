@@ -2,13 +2,13 @@
 
 namespace Drupal\content_sync\Form;
 
-use Drupal\content_sync\ContentSyncManagerInterface;
 use Drupal\Core\Config\ConfigManagerInterface;
-use Drupal\Core\Form\FormBase;
-use Drupal\Core\Config\StorageInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\StorageComparer;
+use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\content_sync\ContentSyncManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,7 +35,7 @@ class ContentSync extends FormBase {
   /**
    * The configuration manager.
    *
-   * @var \Drupal\Core\Config\ConfigManagerInterface;
+   * @var \Drupal\Core\Config\ConfigManagerInterface
    */
   protected $configManager;
 
@@ -86,13 +86,13 @@ class ContentSync extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Validate site uuid unless bypass the validation is selected
+    // Validate site uuid unless bypass the validation is selected.
     $config = \Drupal::config('content_sync.settings');
     if ($config->get('content_sync.site_uuid_override') == FALSE) {
       // Get site uuid from site settings configuration.
       $site_config = $this->config('system.site');
       $target = $site_config->get('uuid');
-      // Get site uuid from content sync folder
+      // Get site uuid from content sync folder.
       $source = $this->syncStorage->read('site.uuid');
       if ($source && $source['site_uuid'] !== $target) {
         $this->messenger()->addError($this->t('The staged content cannot be imported, because it originates from a different site than this site. You can only synchronize content between cloned instances of this site.'));
@@ -107,7 +107,7 @@ class ContentSync extends FormBase {
       '#value' => $this->t('Import all'),
     ];
 
-    //check that there is something on the content sync folder.
+    // Check that there is something on the content sync folder.
     $source_list = $this->syncStorage->listAll();
     $storage_comparer = new StorageComparer($this->syncStorage, $this->activeStorage, $this->configManager);
     $storage_comparer->createChangelist();
@@ -119,7 +119,6 @@ class ContentSync extends FormBase {
     $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
 
     foreach ($storage_comparer->getAllCollectionNames() as $collection) {
-
 
       foreach ($storage_comparer->getChangelist(NULL, $collection) as $config_change_type => $config_names) {
         if (empty($config_names)) {
@@ -133,19 +132,19 @@ class ContentSync extends FormBase {
         ];
         switch ($config_change_type) {
           case 'create':
-            $form[$collection][$config_change_type]['heading']['#value'] = $collection .' '. $this->formatPlural(count($config_names), '@count new', '@count new');
+            $form[$collection][$config_change_type]['heading']['#value'] = $collection . ' ' . $this->formatPlural(count($config_names), '@count new', '@count new');
             break;
 
           case 'update':
-            $form[$collection][$config_change_type]['heading']['#value'] = $collection .' '. $this->formatPlural(count($config_names), '@count changed', '@count changed');
+            $form[$collection][$config_change_type]['heading']['#value'] = $collection . ' ' . $this->formatPlural(count($config_names), '@count changed', '@count changed');
             break;
 
           case 'delete':
-            $form[$collection][$config_change_type]['heading']['#value'] = $collection .' '. $this->formatPlural(count($config_names), '@count removed', '@count removed');
+            $form[$collection][$config_change_type]['heading']['#value'] = $collection . ' ' . $this->formatPlural(count($config_names), '@count removed', '@count removed');
             break;
 
           case 'rename':
-            $form[$collection][$config_change_type]['heading']['#value'] = $collection .' '. $this->formatPlural(count($config_names), '@count renamed', '@count renamed');
+            $form[$collection][$config_change_type]['heading']['#value'] = $collection . ' ' . $this->formatPlural(count($config_names), '@count renamed', '@count renamed');
             break;
         }
         $form[$collection][$config_change_type]['list'] = [
@@ -206,8 +205,8 @@ class ContentSync extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $comparer = $form_state->get('storage_comparer');
     $collections = $comparer->getAllCollectionNames();
-    //Set Batch to process the files from the content directory.
-    //Get the files to be processed
+    // Set Batch to process the files from the content directory.
+    // Get the files to be processed.
     $content_to_sync = [];
     $content_to_delete = [];
     foreach ($collections as $collection => $collection_name) {

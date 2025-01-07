@@ -16,8 +16,8 @@ trait ContentImportTrait {
    *
    * @param $serializer_context
    *
-   * content_sync_directory:
-   * path for the content sync directory.
+   *   content_sync_directory:
+   *   path for the content sync directory.
    *
    * @return array
    */
@@ -31,7 +31,7 @@ trait ContentImportTrait {
       'title' => $this->t('Synchronizing Content...'),
       'message' => $this->t('Synchronizing Content...'),
       'operations' => $operations,
-      //'finished' => [$this, 'finishImportBatch'],
+      // 'finished' => [$this, 'finishImportBatch'],
     ];
     return $batch;
   }
@@ -59,8 +59,8 @@ trait ContentImportTrait {
       $decoded_entity = $item['decoded_entity'];
       $entity_type_id = $item['entity_type_id'];
       $entity = $this->contentSyncManager->getContentImporter()
-                                         ->importEntity($decoded_entity, $serializer_context);
-      if($entity) {
+        ->importEntity($decoded_entity, $serializer_context);
+      if ($entity) {
         $context['results'][] = TRUE;
         $context['message'] = $this->t('Imported content @label (@entity_type: @id).', [
           '@label' => $entity->label(),
@@ -70,8 +70,8 @@ trait ContentImportTrait {
         // Invalidate the CS Cache of the entity.
         $bundle = $entity->bundle();
         $entity_id = $entity->getEntityTypeId();
-        $name = $entity_id . "." .  $bundle . "." . $entity->uuid();
-        $cache = \Drupal::cache('content')->invalidate($entity_id.".".$bundle.":".$name);
+        $name = $entity_id . "." . $bundle . "." . $entity->uuid();
+        $cache = \Drupal::cache('content')->invalidate($entity_id . "." . $bundle . ":" . $name);
         unset($entity);
       }
       else {
@@ -117,10 +117,10 @@ trait ContentImportTrait {
       $error = TRUE;
       $item = array_pop($context['sandbox']['queue']);
       $ids = explode('.', $item);
-      list($entity_type_id, $bundle, $uuid) = $ids;
+      [$entity_type_id, $bundle, $uuid] = $ids;
 
       $entity = $this->contentSyncManager->getEntityTypeManager()->getStorage($entity_type_id)
-                                         ->loadByProperties(['uuid' => $uuid]);
+        ->loadByProperties(['uuid' => $uuid]);
       $entity = array_shift($entity);
       if (!empty($entity)) {
 
@@ -130,11 +130,12 @@ trait ContentImportTrait {
            (int) $entity->id() === 1)) {
 
           $message = $this->t('@uuid - Anonymous user or super admin can not be removed.', [
-          '@entity_type' => $entity_type_id,
-          '@uuid' => $uuid,
+            '@entity_type' => $entity_type_id,
+            '@uuid' => $uuid,
           ]);
 
-        }else{
+        }
+        else {
 
           try {
             $message = $this->t('Deleted content @label (@entity_type: @id).', [
@@ -146,9 +147,10 @@ trait ContentImportTrait {
             $error = FALSE;
             // Invalidate the CS Cache of the entity.
             $bundle = $entity->bundle();
-            $name = $entity_type_id . "." .  $bundle . "." . $entity->uuid();
-            $cache = \Drupal::cache('content')->invalidate($entity_type_id.".".$bundle.":".$name);
-          } catch (EntityStorageException $e) {
+            $name = $entity_type_id . "." . $bundle . "." . $entity->uuid();
+            $cache = \Drupal::cache('content')->invalidate($entity_type_id . "." . $bundle . ":" . $name);
+          }
+          catch (EntityStorageException $e) {
             $message = $e->getMessage();
             \Drupal::messenger()->addError($message);
           }
@@ -203,10 +205,10 @@ trait ContentImportTrait {
       // $operations contains the operations that remained unprocessed.
       $error_operation = reset($operations);
       $message = \Drupal::translation()
-                        ->translate('An error occurred while processing %error_operation with arguments: @arguments', [
-                          '%error_operation' => $error_operation[0],
-                          '@arguments' => print_r($error_operation[1], TRUE),
-                        ]);
+        ->translate('An error occurred while processing %error_operation with arguments: @arguments', [
+          '%error_operation' => $error_operation[0],
+          '@arguments' => print_r($error_operation[1], TRUE),
+        ]);
       \Drupal::messenger()->addError($message, 'error');
     }
   }

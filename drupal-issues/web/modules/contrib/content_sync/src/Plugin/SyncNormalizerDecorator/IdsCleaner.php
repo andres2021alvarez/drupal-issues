@@ -2,11 +2,11 @@
 
 namespace Drupal\content_sync\Plugin\SyncNormalizerDecorator;
 
-use Drupal\content_sync\Plugin\SyncNormalizerDecoratorBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\content_sync\Plugin\SyncNormalizerDecoratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,27 +18,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  *
  * https://chromatichq.com/insights/dependency-injection-drupal-8-plugins
- *
  */
 class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactoryPluginInterface {
 
   /**
+   * The entity field manager.
+   *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entityFieldManager;
 
   /**
+   * The entity bundle manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityTypeBundleInfo;
 
   /**
-   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-   * @param array $configuration
-   * @param string $plugin_id
-   * @param mixed $plugin_definition
-   *
-   * @return static
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
@@ -51,20 +49,26 @@ class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactory
   }
 
   /**
+   * Constructs a new ExportNode object.
+   *
    * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
-   *
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
-   *
+   *   The entity bundle manager.
    */
-  public function __construct(array $configuration,
-            $plugin_id,
-            $plugin_definition,
-            EntityFieldManagerInterface $entityFieldManager,
-            EntityTypeBundleInfoInterface $entityTypeBundleInfo
-          ) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityFieldManagerInterface $entityFieldManager,
+    EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityFieldManager = $entityFieldManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
@@ -78,20 +82,31 @@ class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactory
   }
 
   /**
+   * Cleans the IDs in a normalized entity based  provided entity and format.
+   *
    * @param array $normalized_entity
+   *   Is an array that represents the normalized data of a content entity.
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   * @param $format
+   *   It represents an entity object that is being normalized.
+   * @param mixed $format
+   *   Represents the format in which the entity data will be normalized.
    * @param array $context
+   *   Allows you to pass additional information or configuration settings.
    */
   public function decorateNormalization(array &$normalized_entity, ContentEntityInterface $entity, $format, array $context = []) {
     $this->cleanIds($normalized_entity, $entity);
   }
 
   /**
-   * @param $normalized_entity
+   * Clean the entity references.
+   *
+   * @param mixed $normalized_entity
+   *   The normalized entity.
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to be normalized.
    *
    * @return mixed
+   *   The normalized entity
    */
   protected function cleanIds(&$normalized_entity, ContentEntityInterface $entity) {
     $keys = $entity->getEntityType()->getKeys();
@@ -104,7 +119,7 @@ class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactory
     // Path Alias are now entities and they have their own yml.
     // So,remove the path from the entity to avoid duplicated alias.
     if ($entity->hasLinkTemplate('canonical')) {
-      if(isset($normalized_entity['path'])){
+      if (isset($normalized_entity['path'])) {
         unset($normalized_entity['path']);
       }
     }
@@ -112,14 +127,14 @@ class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactory
     $dependencies = [];
     foreach ($normalized_entity as $field_name => $field_items) {
       foreach ($field_items as $key => $item) {
-        if (!empty($item['dependencies'])){
+        if (!empty($item['dependencies'])) {
           $dependencies = array_merge_recursive($dependencies, $item['dependencies']);
           unset($normalized_entity[$field_name][$key]['dependencies']);
         }
       }
     }
-    if (!empty($dependencies)){
-      array_walk($dependencies, function(&$v) {
+    if (!empty($dependencies)) {
+      array_walk($dependencies, function (&$v) {
         $v = array_unique($v);
       });
       $normalized_entity['_content_sync']['entity_dependencies'] = $dependencies;
@@ -128,10 +143,17 @@ class IdsCleaner extends SyncNormalizerDecoratorBase implements ContainerFactory
   }
 
   /**
+   * Fix references to entities.
+   *
    * @param array $data
-   * @param $entity_type_id
+   *   The entity data.
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param bool $bundle
+   *   If true then bundle the entity data.
    *
    * @return array
+   *   the array of entity
    */
   protected function fixReferences(&$data, $entity_type_id, $bundle = FALSE) {
     if ($bundle) {

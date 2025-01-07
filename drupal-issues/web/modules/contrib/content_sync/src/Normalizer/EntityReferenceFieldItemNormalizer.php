@@ -2,11 +2,11 @@
 
 namespace Drupal\content_sync\Normalizer;
 
-use Drupal\content_sync\ContentSyncManager;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\RevisionableInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
+use Drupal\content_sync\ContentSyncManager;
 use Drupal\serialization\Normalizer\FieldItemNormalizer;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
@@ -53,35 +53,25 @@ class EntityReferenceFieldItemNormalizer extends FieldItemNormalizer {
         $target_type = $entity->getEntityTypeId();
         $target_uuid = $entity->uuid();
         $ids = [
-            $target_type,
-            $entity->bundle(),
-            $target_uuid,
+          $target_type,
+          $entity->bundle(),
+          $target_uuid,
         ];
         $dependency = implode(ContentSyncManager::DELIMITER, $ids);
         // Add the target entity UUID and type to the normalized output values.
         $values['target_type'] = $target_type;
         $values['target_uuid'] = $target_uuid;
-        // Include a dependency
+        // Include a dependency.
         $values['dependencies'][$target_type][] = $dependency;
 
         // Remove target revision id as we are not syncing revisions.
-        if (isset($values['target_revision_id'])){
+        if (isset($values['target_revision_id'])) {
           unset($values['target_revision_id']);
         }
 
-        // TODO: Verify if the canonical url is necessary.
-        //       Because anyway the url is deleted.
-        /*// Add a 'url' value if there is a reference and a canonical URL. Hard
-        // code 'canonical' here as config entities override the default $rel
-        // parameter value to 'edit-form.
-        if ($entity->hasLinkTemplate('canonical')) {
-          $url = $entity->toUrl('canonical')->toString();
-          $values['url'] = $url;
-        }*/
-
         $key = $field_item->mainPropertyName();
         if (!empty($values[$key])) {
-            unset($values[$key]);
+          unset($values[$key]);
         }
         if (!empty($values['url'])) {
           unset($values['url']);
@@ -108,16 +98,15 @@ class EntityReferenceFieldItemNormalizer extends FieldItemNormalizer {
       if ($entity = $this->entityRepository->loadEntityByUuid($target_type, $data['target_uuid'])) {
         $key = $field_item->mainPropertyName();
         if (is_a($entity, RevisionableInterface::class, TRUE)) {
-          return [$key => $entity->id(),
-                  'target_revision_id' => $entity->getRevisionId()];
+          return [
+            $key => $entity->id(),
+            'target_revision_id' => $entity->getRevisionId(),
+          ];
         }
         return [$key => $entity->id()];
       }
       else {
-        // Unable to load entity by uuid.
-        // TODO: change Error to Log/Warning - to avoid stoping the import of the rest of the entities.   ---> Same for throws above.
-        //throw new InvalidArgumentException(sprintf('No "%s" entity found with UUID "%s" for field "%s".', $data['target_type'], $data['target_uuid'], $field_item->getName()));
-        return[];
+        return [];
       }
     }
     return parent::constructValue($data, $context);

@@ -2,9 +2,6 @@
 
 namespace Drupal\content_sync\Normalizer;
 
-use Drupal\Core\Field\Plugin\Field\FieldType\TimestampItem;
-use Drupal\Core\TypedData\Plugin\DataType\Timestamp;
-
 use Drupal\serialization\Normalizer\TimestampItemNormalizer as BaseTimestampItemNormalizer;
 
 /**
@@ -13,7 +10,7 @@ use Drupal\serialization\Normalizer\TimestampItemNormalizer as BaseTimestampItem
  * Overrides FieldItemNormalizer and
  * \Drupal\serialization\Normalizer\TimestampNormalizer
  * to use
- * \Drupal\content_sync\Normalizer\TimestampNormalizer
+ * \Drupal\content_sync\Normalizer\TimestampNormalizer.
  *
  * Overrides FieldItemNormalizer to
  * - during denormalization consider more than one value
@@ -30,16 +27,18 @@ class TimestampItemNormalizer extends BaseTimestampItemNormalizer {
     }
     $field_item = $context['target_instance'];
     $denormalized_data = [];
-    foreach( $field_item->getProperties() as $item_key => $item){
-      if(isset($data[$item_key])){
+    foreach ($field_item->getProperties() as $item_key => $item) {
+      if (isset($data[$item_key])) {
         $item_class = $item->getDataDefinition()->getClass();
         if ($this->serializer->supportsDenormalization($data[$item_key], $item_class, NULL, $context)) {
-          $denormalized_data[$item_key] = $this->serializer->denormalize($data[$item_key],$item_class, NULL, $context );
-        }else{
+          $denormalized_data[$item_key] = $this->serializer->denormalize($data[$item_key], $item_class, NULL, $context);
+        }
+        else {
           $denormalized_data[$item_key] = $data[$item_key];
         }
       }
     }
     return $denormalized_data;
   }
+
 }

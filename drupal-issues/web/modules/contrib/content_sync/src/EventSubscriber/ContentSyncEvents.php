@@ -2,11 +2,9 @@
 
 namespace Drupal\content_sync\EventSubscriber;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\Core\Entity\EntityTypeEvents;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeEvent;
-
+use Drupal\Core\Entity\EntityTypeEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Create a content subscriber.
@@ -14,8 +12,7 @@ use Drupal\Core\Entity\EntityTypeEvent;
 class ContentSyncEvents implements EventSubscriberInterface {
 
   /**
-   * This method is called whenever the EntityTypeEvents::CREATE event is 
-   * dispatched.
+   * This method is called whenever the event is dispatched.
    *
    * @param \Drupal\Core\Entity\EntityTypeEvent $event
    *   The Event to process.

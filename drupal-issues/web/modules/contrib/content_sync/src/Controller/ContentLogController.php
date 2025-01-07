@@ -3,18 +3,17 @@
 namespace Drupal\content_sync\Controller;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Link;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -81,6 +80,8 @@ class ContentLogController extends ControllerBase {
    *   The date formatter service.
    * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
    *   The form builder service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
   public function __construct(Connection $database, ModuleHandlerInterface $module_handler, DateFormatterInterface $date_formatter, FormBuilderInterface $form_builder, EntityTypeManagerInterface $entity_type_manager) {
     $this->database = $database;
@@ -130,8 +131,7 @@ class ContentLogController extends ControllerBase {
 
     $this->moduleHandler->loadInclude('module_sync', 'admin.inc');
 
-    //$build['admin_filter_form'] = $this->formBuilder->getForm('Drupal\content_sync\Form\ContentLogFilterForm');
-
+    // $build['admin_filter_form'] = $this->formBuilder->getForm('Drupal\content_sync\Form\ContentLogFilterForm');
     $header = [
       // Icon column.
       '',
@@ -143,15 +143,18 @@ class ContentLogController extends ControllerBase {
         'data' => $this->t('Date'),
         'field' => 'w.csid',
         'sort' => 'desc',
-        'class' => [RESPONSIVE_PRIORITY_LOW]],
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ],
       $this->t('Message'),
       [
         'data' => $this->t('User'),
         'field' => 'ufd.name',
-        'class' => [RESPONSIVE_PRIORITY_MEDIUM]],
+        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+      ],
       [
         'data' => $this->t('Operations'),
-        'class' => [RESPONSIVE_PRIORITY_LOW]],
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ],
     ];
 
     $query = $this->database->select('cs_logs', 'w')
@@ -179,20 +182,6 @@ class ContentLogController extends ControllerBase {
 
     foreach ($result as $log) {
       $message = $this->formatMessage($log);
-      if ($message && isset($log->csid)) {
-        $title = Unicode::truncate(Html::decodeEntities(strip_tags($message)), 256, TRUE, TRUE);
-        $log_text = Unicode::truncate($title, 56, TRUE, TRUE);
-        // The link generator will escape any unsafe HTML entities in the final
-        // text.
-        /*$message = $this->l($log_text, new Url('log.event', ['event_id' => $log->csid], [
-          'attributes' => [
-            // Provide a title for the link for useful hover hints. The
-            // Attribute object will escape any unsafe HTML entities in the
-            // final text.
-            'title' => $title,
-          ],
-        ]));*/
-      }
       $username = [
         '#theme' => 'username',
         '#account' => $this->userStorage->load($log->uid),
@@ -218,9 +207,6 @@ class ContentLogController extends ControllerBase {
       '#rows' => $rows,
       '#attributes' => ['id' => 'admin-cslog', 'class' => ['admin-cslog']],
       '#empty' => $this->t('No log messages available.'),
-      //'#attached' => [
-      //  'library' => ['cslog/drupal.cslog'],
-      //],
     ];
     $build['log_pager'] = ['#type' => 'pager'];
 
@@ -249,48 +235,87 @@ class ContentLogController extends ControllerBase {
       ];
       $rows = [
         [
-          ['data' => $this->t('Type'), 'header' => TRUE],
-          $this->t($cslog->type),
+          [
+            'data' => $this->t('Type'),
+            'header' => TRUE,
+          ],
+          $cslog->type,
         ],
         [
-          ['data' => $this->t('Date'), 'header' => TRUE],
+          [
+            'data' => $this->t('Date'),
+            'header' => TRUE,
+          ],
           $this->dateFormatter->format($cslog->timestamp, 'long'),
         ],
         [
-          ['data' => $this->t('User'), 'header' => TRUE],
-          ['data' => $username],
+          [
+            'data' => $this->t('User'),
+            'header' => TRUE,
+          ],
+          [
+            'data' => $username,
+          ],
         ],
         [
-          ['data' => $this->t('Location'), 'header' => TRUE],
+          [
+            'data' => $this->t('Location'),
+            'header' => TRUE,
+          ],
           Link::fromTextAndUrl($cslog->location, $cslog->location ? Url::fromUri($cslog->location) : Url::fromRoute('<none>'))->toString(),
         ],
         [
-          ['data' => $this->t('Referrer'), 'header' => TRUE],
+          [
+            'data' => $this->t('Referrer'),
+            'header' => TRUE,
+          ],
           Link::fromTextAndUrl($cslog->referer, $cslog->referer ? Url::fromUri($cslog->referer) : Url::fromRoute('<none>'))->toString(),
         ],
         [
-          ['data' => $this->t('Message'), 'header' => TRUE],
+          [
+            'data' => $this->t('Message'),
+            'header' => TRUE,
+          ],
           $message,
         ],
         [
-          ['data' => $this->t('Severity'), 'header' => TRUE],
+          [
+            'data' => $this->t('Severity'),
+            'header' => TRUE,
+          ],
           $severity[$cslog->severity],
         ],
         [
-          ['data' => $this->t('Hostname'), 'header' => TRUE],
+          [
+            'data' => $this->t('Hostname'),
+            'header' => TRUE,
+          ],
           $cslog->hostname,
         ],
         [
-          ['data' => $this->t('Operations'), 'header' => TRUE],
-          ['data' => ['#markup' => $cslog->link]],
+          [
+            'data' => $this->t('Operations'),
+            'header' => TRUE,
+          ],
+          [
+            'data' => [
+              '#markup' => $cslog->link,
+            ],
+          ],
         ],
       ];
       $build['cslog_table'] = [
         '#type' => 'table',
         '#rows' => $rows,
-        '#attributes' => ['class' => ['cslog-event']],
+        '#attributes' => [
+          'class' => [
+            'cslog-event',
+          ],
+        ],
         '#attached' => [
-          'library' => ['cslog/drupal.cslog'],
+          'library' => [
+            'cslog/drupal.cslog',
+          ],
         ],
       ];
     }
@@ -306,7 +331,7 @@ class ContentLogController extends ControllerBase {
    */
   protected function buildFilterQuery() {
     if (empty($_SESSION['cslog_overview_filter'])) {
-      return;
+      return [];
     }
 
     $this->moduleHandler->loadInclude('content_sync', 'admin.inc');
@@ -345,19 +370,24 @@ class ContentLogController extends ControllerBase {
    *   are not set.
    */
   public function formatMessage($row) {
-    // Check for required properties.
     if (isset($row->message, $row->variables)) {
-      $variables = @unserialize($row->variables);
-      // Messages without variables or user specified text.
-      if ($variables === NULL) {
+      $variables = unserialize($row->variables, ['allowed_classes' => FALSE]);
+
+      if ($variables === FALSE && $row->variables !== 'b:0;') {
+        $message = $this->t('Log data is corrupted and cannot be unserialized: @message', [
+          '@message' => Xss::filterAdmin($row->message),
+        ]);
+      }
+      elseif ($variables === NULL) {
         $message = Xss::filterAdmin($row->message);
       }
-      elseif (!is_array($variables)) {
-        $message = $this->t('Log data is corrupted and cannot be unserialized: @message', ['@message' => Xss::filterAdmin($row->message)]);
+      elseif (is_array($variables)) {
+        $message = Xss::filterAdmin($row->message);
       }
-      // Message to translate with injected variables.
       else {
-        $message = $this->t(Xss::filterAdmin($row->message), $variables);
+        $message = $this->t('Unexpected data format: @message', [
+          '@message' => Xss::filterAdmin($row->message),
+        ]);
       }
     }
     else {
@@ -409,7 +439,7 @@ class ContentLogController extends ControllerBase {
       }
     }
 
-    $build['cs_log_top_table']  = [
+    $build['cs_log_top_table'] = [
       '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,

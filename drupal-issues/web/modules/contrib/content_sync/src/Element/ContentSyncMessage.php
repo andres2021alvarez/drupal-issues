@@ -2,8 +2,8 @@
 
 namespace Drupal\content_sync\Element;
 
-use Drupal\Core\Render\Element\RenderElement;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Element\RenderElement;
 use Drupal\Core\Url;
 
 /**
@@ -147,10 +147,6 @@ class ContentSyncMessage extends RenderElement {
     $element['#attached']['library'][] = 'content_sync/content_sync.element.message';
     return $element;
   }
-
-  /****************************************************************************/
-  // Manage closed functions.
-  /****************************************************************************/
 
   /**
    * Is message closed via User Data or State API.

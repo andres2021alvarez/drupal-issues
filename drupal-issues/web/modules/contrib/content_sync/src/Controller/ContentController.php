@@ -2,26 +2,23 @@
 
 namespace Drupal\content_sync\Controller;
 
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\system\FileDownloadController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Drupal\Component\Utility\Unicode;
-//use Drupal\Core\Archiver\ArchiveTar;
 use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Diff\DiffFormatter;
-//use Drupal\Core\Serialization\Yaml;
-use Drupal\Core\Url;
-//use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\MimeType\MimeTypeGuesser;
+use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Mime\Header\UnstructuredHeader;
-
 
 /**
  * Returns responses for content module routes.
  */
 class ContentController implements ContainerInjectionInterface {
+
+
   /**
    * The target storage.
    *
@@ -58,6 +55,13 @@ class ContentController implements ContainerInjectionInterface {
   protected $diffFormatter;
 
   /**
+   * Mime Type file.
+   *
+   * @var \Drupal\Core\File\MimeType\MimeTypeGuesser
+   */
+  protected $mimeTypeGuesser;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -66,7 +70,8 @@ class ContentController implements ContainerInjectionInterface {
       $container->get('content.storage.sync'),
       $container->get('config.manager'),
       $container->get('diff.formatter'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('file.mime_type.guesser')
     );
   }
 
@@ -76,36 +81,40 @@ class ContentController implements ContainerInjectionInterface {
    * @param \Drupal\Core\Config\StorageInterface $target_storage
    *   The target storage.
    * @param \Drupal\Core\Config\StorageInterface $source_storage
-   *   The source storage
-   * @param \Drupal\system\FileDownloadController $file_download_controller
+   *   The source storage.
+   * @param \Drupal\Core\Config\ConfigManagerInterface $content_manager
+   *   The content manager.
+   * @param \Drupal\Core\Diff\DiffFormatter $diff_formatter
+   *   The diff formatter.
+   * @param \Drupal\system\FileSystemInterface $file_system
    *   The file download controller.
+   * @param \Drupal\Core\File\MimeType\MimeTypeGuesser $mimeTypeGuesser
+   *   Mime Type file.
    */
-  public function __construct(StorageInterface $target_storage, StorageInterface $source_storage, ConfigManagerInterface $content_manager, DiffFormatter $diff_formatter, FileSystemInterface $file_system) {
+  public function __construct(StorageInterface $target_storage, StorageInterface $source_storage, ConfigManagerInterface $content_manager, DiffFormatter $diff_formatter, FileSystemInterface $file_system, MimeTypeGuesser $mimeTypeGuesser) {
     $this->targetStorage = $target_storage;
     $this->sourceStorage = $source_storage;
     $this->contentManager = $content_manager;
     $this->diffFormatter = $diff_formatter;
     $this->fileSystem = $file_system;
+    $this->mimeTypeGuesser = $mimeTypeGuesser;
   }
 
   /**
    * Downloads a tarball of the site content.
    */
   public function downloadExport() {
-    // NOTE:  Getting - You are not authorized to access this page.
-    //$request = new Request(['file' => 'content.tar.gz']);
-    //return $this->fileDownloadController->download($request, 'temporary');
     $filename = 'content.tar.gz';
     $file_path = $this->fileSystem->getTempDirectory() . '/' . $filename;
-    if (file_exists($file_path) ) {
+    if (file_exists($file_path)) {
       unset($_SESSION['content_tar_download_file']);
-      $mime = \Drupal::service('file.mime_type.guesser')->guessMimeType($file_path);
-      $headers = array(
+      $mime = $this->mimeTypeGuesser->guessMimeType($file_path);
+      $headers = [
         'Content-Type' => $mime . '; name="' . (new UnstructuredHeader('Content-Type', basename($file_path)))->getBodyAsString() . '"',
         'Content-Length' => filesize($file_path),
         'Content-Disposition' => 'attachment; filename="' . (new UnstructuredHeader('Content-Disposition', basename($filename)))->getBodyAsString() . '"',
         'Cache-Control' => 'private',
-      );
+      ];
       return new BinaryFileResponse($file_path, 200, $headers);
     }
     return -1;
@@ -135,7 +144,7 @@ class ContentController implements ContainerInjectionInterface {
 
     $build = [];
 
-    $build['#title'] = t('View changes of @content_file', ['@content_file' => $source_name]);
+    $build['#title'] = $this->t('View changes of @content_file', ['@content_file' => $source_name]);
     // Add the CSS for the inline diff.
     $build['#attached']['library'][] = 'system/diff';
 
@@ -145,8 +154,14 @@ class ContentController implements ContainerInjectionInterface {
         'class' => ['diff'],
       ],
       '#header' => [
-        ['data' => t('Active'), 'colspan' => '2'],
-        ['data' => t('Staged'), 'colspan' => '2'],
+        [
+          'data' => $this->t('Active'),
+          'colspan' => '2',
+        ],
+        [
+          'data' => $this->t('Staged'),
+          'colspan' => '2',
+        ],
       ],
       '#rows' => $this->diffFormatter->format($diff),
     ];

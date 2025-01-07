@@ -7,22 +7,44 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\serialization\Normalizer\SerializedColumnNormalizerTrait;
 use Symfony\Component\Serializer\Serializer;
 
+/**
+ * Content Importer.
+ */
 class ContentImporter implements ContentImporterInterface {
 
   use SerializedColumnNormalizerTrait;
 
+  /**
+   * Format  data for serialization.
+   *
+   * @var string
+   */
   protected $format = 'yaml';
 
+  /**
+   * Update entities.
+   *
+   * @var bool
+   */
   protected $updateEntities = TRUE;
 
+  /**
+   * Context for serialization.
+   *
+   * @var array
+   */
   protected $context = [];
 
   /**
+   * Serialization context for serial.
+   *
    * @var \Symfony\Component\Serializer\Serializer
    */
   protected $serializer;
 
   /**
+   * Entity type manager instance.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
@@ -35,6 +57,9 @@ class ContentImporter implements ContentImporterInterface {
     $this->entityTypeManager = $entity_type_manager;
   }
 
+  /**
+   * Import Entity.
+   */
   public function importEntity($decoded_entity, $context = []) {
     $context = $this->context + $context;
     if (!empty($context['entity_type'])) {
@@ -49,15 +74,14 @@ class ContentImporter implements ContentImporterInterface {
 
     $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
 
-    //Exception for parent null -- allowing the term to be displayed on the taxonomy list.
     if ($entity_type_id == 'taxonomy_term') {
-      if(empty($decoded_entity['parent'])){
+      if (empty($decoded_entity['parent'])) {
         $decoded_entity['parent']['target_id'] = 0;
       }
     }
 
-    //Get Translations before denormalize
-    if(!empty($decoded_entity['_translations'])){
+    // Get Translations before denormalize.
+    if (!empty($decoded_entity['_translations'])) {
       $entity_translations = $decoded_entity['_translations'];
     }
 
@@ -71,9 +95,9 @@ class ContentImporter implements ContentImporterInterface {
       $entity = $this->syncEntity($entity);
     }
 
-    // Include Translations
-    if ($entity){
-      if ( isset($entity_translations) && is_array($entity_translations) ) {
+    // Include Translations.
+    if ($entity) {
+      if (isset($entity_translations) && is_array($entity_translations)) {
         $this->updateTranslation($entity, $entity_type, $entity_translations, $context);
       }
     }
@@ -83,13 +107,13 @@ class ContentImporter implements ContentImporterInterface {
   /**
    * Updates translations.
    *
-   * @param $entity
+   * @param mixed $entity
    *   An entity object.
    * @param \Drupal\Core\Entity\ContentEntityType $entity_type
    *   A ContentEntityType object.
    * @param array $entity_translations
    *   An array of translations.
-   * @param $context
+   * @param array $context
    *   The batch context.
    */
   protected function updateTranslation(&$entity, $entity_type, $entity_translations, $context) {
@@ -104,8 +128,8 @@ class ContentImporter implements ContentImporterInterface {
       $fields = $translation->getFieldDefinitions();
 
       foreach ($translation as $itemID => $item) {
-        if ($entity_translation->hasField($itemID)){
-          if ($fields[$itemID]->isTranslatable() == TRUE){
+        if ($entity_translation->hasField($itemID)) {
+          if ($fields[$itemID]->isTranslatable() == TRUE) {
             $entity_translation->$itemID->setValue($item->getValue());
           }
         }
@@ -124,7 +148,10 @@ class ContentImporter implements ContentImporterInterface {
   }
 
   /**
+   * Function get formatted.
+   *
    * @return string
+   *   the returned formatted
    */
   public function getFormat() {
     return $this->format;
@@ -133,10 +160,10 @@ class ContentImporter implements ContentImporterInterface {
   /**
    * Synchronize a given entity.
    *
-   * @param ContentEntityInterface $entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity to update.
    *
-   * @return ContentEntityInterface
+   * @return \Drupal\Core\Entity\ContentEntityInterface
    *   The updated entity
    */
   protected function syncEntity(ContentEntityInterface $entity) {
@@ -154,7 +181,7 @@ class ContentImporter implements ContentImporterInterface {
   /**
    * Serializes fields which have to be stored serialized.
    *
-   * @param $entity
+   * @param mixed $entity
    *   The entity to update.
    *
    * @return mixed
@@ -169,7 +196,7 @@ class ContentImporter implements ContentImporterInterface {
         if (!empty($serialized_property_names)) {
           $field_values = $field_item->getValue();
           foreach ($serialized_property_names as $property_name) {
-            if(isset($field_values[$property_name])){
+            if (isset($field_values[$property_name])) {
               $field_values[$property_name] = (is_array($field_values[$property_name])) ? serialize($field_values[$property_name]) : $field_values[$property_name];
             }
           }
@@ -186,7 +213,7 @@ class ContentImporter implements ContentImporterInterface {
   public function prepareEntity(ContentEntityInterface $entity) {
     $uuid = $entity->uuid();
     $original_entity = $this->entityTypeManager->getStorage($entity->getEntityTypeId())
-                                               ->loadByProperties(['uuid' => $uuid]);
+      ->loadByProperties(['uuid' => $uuid]);
 
     if (!empty($original_entity)) {
       $original_entity = reset($original_entity);
@@ -199,7 +226,7 @@ class ContentImporter implements ContentImporterInterface {
         foreach ($entity->_restSubmittedFields as $field_name) {
           if ($this->isValidEntityField($original_entity, $entity, $field_name)) {
             $original_entity->set($field_name, $entity->get($field_name)
-                                                      ->getValue());
+              ->getValue());
           }
         }
       }
@@ -215,9 +242,9 @@ class ContentImporter implements ContentImporterInterface {
   /**
    * Checks if the entity field needs to be synchronized.
    *
-   * @param ContentEntityInterface $original_entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $original_entity
    *   The original entity.
-   * @param ContentEntityInterface $entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity.
    * @param string $field_name
    *   The field name.
@@ -239,7 +266,7 @@ class ContentImporter implements ContentImporterInterface {
     elseif (in_array($field_name, $entity_keys, TRUE)) {
       // Unchanged values for entity keys don't need access checking.
       if ($original_entity->get($field_name)
-                          ->getValue() === $entity->get($field_name)->getValue()
+        ->getValue() === $entity->get($field_name)->getValue()
           // It is not possible to set the language to NULL as it is
           // automatically re-initialized.
           // As it must not be empty, skip it if it is.
@@ -274,7 +301,7 @@ class ContentImporter implements ContentImporterInterface {
           }
           $valid = FALSE;
           \Drupal::logger('content_sync')
-                 ->error($validation->getMessage());
+            ->error($validation->getMessage());
         }
       }
     }
@@ -282,14 +309,20 @@ class ContentImporter implements ContentImporterInterface {
   }
 
   /**
+   * Get context information.
+   *
    * @return array
+   *   returns array of context information
    */
   public function getContext() {
     return $this->context;
   }
 
   /**
+   * Set context information.
+   *
    * @param array $context
+   *   Returns array of context.
    */
   public function setContext($context) {
     $this->context = $context;

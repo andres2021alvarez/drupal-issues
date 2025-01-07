@@ -4,18 +4,6 @@
  * @file
  * Preprocessors and helper functions to make theming easier.
  */
-use Drupal\Core\Link;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Url;
-use Drupal\Core\Serialization\Yaml;
-use Drupal\Core\Template\Attribute;
-use Drupal\Component\Utility\Xss;
-use Drupal\webform\Element\WebformCodeMirror;
-use Drupal\webform\WebformMessageManagerInterface;
-use Drupal\webform\Utility\WebformYaml;
-use Drupal\webform\Utility\WebformDateHelper;
-use Drupal\webform\Utility\WebformDialogHelper;
-use Drupal\webform\Utility\WebformElementHelper;
 
 /**
  * Prepares variables for contnt sync help.
@@ -52,7 +40,7 @@ function template_preprocess_content_sync_help(array &$variables) {
 }
 
 /******************************************************************************/
-// Element templates
+// Element templates.
 /******************************************************************************/
 
 /**

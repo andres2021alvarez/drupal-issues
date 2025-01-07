@@ -2,18 +2,18 @@
 
 namespace Drupal\content_sync\Form;
 
-use Drupal\content_sync\ContentSyncManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Url;
+use Drupal\content_sync\ContentSyncManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Class ContentExportMultiple
+ * Content Export Multiple.
  *
  * @package Drupal\content_sync_ui\Form
  */
@@ -36,20 +36,31 @@ class ContentExportMultiple extends ConfirmFormBase {
   protected $tempStoreFactory;
 
   /**
+   * Interface sync manager.
+   *
    * @var \Drupal\content_sync\ContentSyncManagerInterface
    */
   protected $contentSyncManager;
 
   /**
+   * Interface sync manager ui.
+   *
    * @var \Drupal\content_sync_ui\Toolbox\ContentSyncUIToolboxInterface
    */
   protected $contentSyncUIToolbox;
 
   /**
+   * Initializes the content array.
+   *
    * @var array
    */
   protected $entityList = [];
 
+  /**
+   * Formats the content array.
+   *
+   * @var mixed
+   */
   protected $formats;
 
   /**
@@ -59,6 +70,12 @@ class ContentExportMultiple extends ConfirmFormBase {
    *   The tempstore factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $manager
    *   The entity type manager.
+   * @param \Drupal\content_sync\ContentSyncManagerInterface $content_sync_manager
+   *   The content sync manager.
+   * @param string $formats
+   *   The format manager.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The file system interface.
    */
   public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityTypeManagerInterface $manager, ContentSyncManagerInterface $content_sync_manager, array $formats, FileSystemInterface $file_system) {
     $this->tempStoreFactory = $temp_store_factory;
@@ -106,7 +123,7 @@ class ContentExportMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Export');
+    return $this->t('Export');
   }
 
   /**
@@ -141,7 +158,6 @@ class ContentExportMultiple extends ConfirmFormBase {
     $form = parent::buildForm($form, $form_state);
     return $form;
   }
-
 
   /**
    * {@inheritdoc}

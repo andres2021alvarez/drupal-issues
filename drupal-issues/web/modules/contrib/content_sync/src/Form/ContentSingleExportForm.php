@@ -2,16 +2,14 @@
 
 namespace Drupal\content_sync\Form;
 
-use Drupal\content_sync\Exporter\ContentExporterInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Entity\ContentEntityType;
+use Drupal\content_sync\Exporter\ContentExporterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
-
 
 /**
  * Provides a form for exporting a single content file.
@@ -89,7 +87,7 @@ class ContentSingleExportForm extends FormBase {
       '#type' => 'select',
       '#options' => $content_types,
       '#default_value' => $content_type,
-      '#attributes' => array('onchange' => 'this.form.content_name.value = null; if(this.form.content_entity){ this.form.content_entity.value = null; } this.form.export.value = null; this.form.submit();'),
+      '#attributes' => ['onchange' => 'this.form.content_name.value = null; if(this.form.content_entity){ this.form.content_entity.value = null; } this.form.export.value = null; this.form.submit();'],
     ];
 
     $default_type = $form_state->getValue('content_type', $content_type);
@@ -99,11 +97,11 @@ class ContentSingleExportForm extends FormBase {
       '#type' => 'select',
       '#options' => $this->findContent($default_type),
       '#default_value' => $content_name,
-      '#attributes' => array('onchange' => 'if(this.form.content_entity){ this.form.content_entity.value = null; } this.form.export.value = null; this.form.submit();'),
+      '#attributes' => ['onchange' => 'if(this.form.content_entity){ this.form.content_entity.value = null; } this.form.export.value = null; this.form.submit();'],
     ];
 
-    // Auto-complete field for the content entity
-    if($default_type && $default_name){
+    // Auto-complete field for the content entity.
+    if ($default_type && $default_name) {
       $form['content_entity'] = [
         '#title' => $this->t('Content Entity'),
         '#type' => 'entity_autocomplete',
@@ -115,13 +113,13 @@ class ContentSingleExportForm extends FormBase {
         '#ajax' => [
           'callback' => '::updateExport',
           'wrapper' => 'edit-export-wrapper',
-            'event' => 'autocompleteclose',
+          'event' => 'autocompleteclose',
         ],
       ];
       // Autocomplete doesn't support target bundles parameter on bundle-less entities.
       $target_type = $this->entityTypeManager->getDefinition($default_type);
       $target_type_bundles = $target_type->getBundleEntityType();
-      if(is_null($target_type_bundles)){
+      if (is_null($target_type_bundles)) {
         unset($form['content_entity']['#selection_settings']);
       }
     }
@@ -164,21 +162,21 @@ class ContentSingleExportForm extends FormBase {
    * Handles switching the export textarea.
    */
   public function updateExport($form, FormStateInterface $form_state) {
-    // Get submitted values
+    // Get submitted values.
     $entity_type = $form_state->getValue('content_type');
     $entity_id = $form_state->getValue('content_entity');
 
-    // DB entity to YAML
+    // DB entity to YAML.
     $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
 
     // Generate the YAML file.
     $serializer_context = [];
     $exported_entity = $this->contentExporter->exportEntity($entity, $serializer_context);
 
-    // Create the name
+    // Create the name.
     $name = $entity_type . "." . $entity->bundle() . "." . $entity->uuid();
 
-    // Return form values
+    // Return form values.
     $form['export']['#value'] = $exported_entity;
     $form['export']['#description'] = $this->t('Filename: %name', ['%name' => $name . '.yml']);
     return $form['export'];

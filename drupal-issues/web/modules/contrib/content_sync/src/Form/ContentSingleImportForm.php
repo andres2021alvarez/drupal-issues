@@ -2,11 +2,11 @@
 
 namespace Drupal\content_sync\Form;
 
-use Drupal\content_sync\Importer\ContentImporterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Serialization\Yaml;
+use Drupal\content_sync\Importer\ContentImporterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,6 +32,9 @@ class ContentSingleImportForm extends FormBase {
     $this->contentImporter = $content_importer;
   }
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
@@ -78,13 +81,14 @@ class ContentSingleImportForm extends FormBase {
       if (empty($data['_content_sync']['entity_type'])) {
         throw new \Exception($this->t('Entity type could not be determined.'));
       }
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $form_state->setErrorByName('import', $this->t('The import failed with the following message: %message', ['%message' => $e->getMessage()]));
       $this->logger('content_sync')
-           ->error('The import failed with the following message: %message', [
-             '%message' => $e->getMessage(),
-             'link' => 'Import Single',
-           ]);
+        ->error('The import failed with the following message: %message', [
+          '%message' => $e->getMessage(),
+          'link' => 'Import Single',
+        ]);
     }
   }
 
@@ -105,4 +109,5 @@ class ContentSingleImportForm extends FormBase {
       $this->messenger()->addError($this->t('Entity could not be imported.'));
     }
   }
+
 }

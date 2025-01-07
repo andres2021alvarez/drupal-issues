@@ -13,15 +13,15 @@ class ContentDatabaseStorage extends DatabaseStorage {
   /**
    * {@inheritdoc}
    */
-  public function cs_write($name, array $data, $collection) {
+  public function csWrite($name, array $data, $collection) {
     $data = $this->encode($data);
     try {
-      return $this->cs_doWrite($name, $data, $collection);
+      return $this->csDoWrite($name, $data, $collection);
     }
     catch (\Exception $e) {
       // If there was an exception, try to create the table.
       if ($this->ensureTableExists()) {
-        return $this->cs_doWrite($name, $data, $collection);
+        return $this->csDoWrite($name, $data, $collection);
       }
       // Some other failure that we can not recover from.
       throw $e;
@@ -39,8 +39,9 @@ class ContentDatabaseStorage extends DatabaseStorage {
    *   The content collection name, entity type + bundle.
    *
    * @return bool
+   *   True if the write succeeded
    */
-  protected function cs_doWrite($name, $data, $collection) {
+  protected function csDoWrite($name, $data, $collection) {
     $options = ['return' => Database::RETURN_AFFECTED] + $this->options;
     $this->connection->delete($this->table, $options)
       ->condition('name', $name)
@@ -55,7 +56,7 @@ class ContentDatabaseStorage extends DatabaseStorage {
   /**
    * {@inheritdoc}
    */
-  public function cs_read($name) {
+  public function csRead($name) {
     $data = FALSE;
     try {
       $raw = $this->connection->query('SELECT data FROM {' . $this->connection->escapeTable($this->table) . '} WHERE name = :name', [':name' => $name], $this->options)->fetchField();
@@ -77,7 +78,7 @@ class ContentDatabaseStorage extends DatabaseStorage {
    *
    * @todo Ignore replica targets for data manipulation operations.
    */
-  public function cs_delete($name) {
+  public function csDelete($name) {
     $options = ['return' => Database::RETURN_AFFECTED] + $this->options;
     return (bool) $this->connection->delete($this->table, $options)
       ->condition('name', $name)

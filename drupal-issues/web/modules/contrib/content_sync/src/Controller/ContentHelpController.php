@@ -5,9 +5,9 @@ namespace Drupal\content_sync\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\content_sync\ContentSyncHelpManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides route responses for content_sync help.
@@ -47,12 +47,12 @@ class ContentHelpController extends ControllerBase implements ContainerInjection
    *   The current request.
    *
    * @return array
-   *   A renderable array containing a help about (aka How can we help you?) page.
+   *   A renderable array containing a help about page.
    */
   public function about(Request $request) {
     $build = $this->helpManager->buildAbout();
     unset($build['title']);
-    $build +=[
+    $build += [
       '#prefix' => '<div class="content_sync-help">',
       '#suffix' => '</div>',
     ];

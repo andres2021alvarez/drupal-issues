@@ -2,16 +2,12 @@
 
 namespace Drupal\content_sync\Normalizer;
 
-use Drupal\content_sync\ContentSyncManager;
-use Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager;
-use Drupal\content_sync\Plugin\SyncNormalizerDecoratorTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\RevisionableInterface;
-use Drupal\menu_link_content\Entity\MenuLinkContent;
-use Drupal\path_alias\Entity\PathAlias;
+use Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager;
+use Drupal\content_sync\Plugin\SyncNormalizerDecoratorTrait;
 use Drupal\serialization\Normalizer\ContentEntityNormalizer as BaseContentEntityNormalizer;
 
 /**
@@ -22,7 +18,9 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
   use SyncNormalizerDecoratorTrait;
 
   /**
-   * @var SyncNormalizerDecoratorManager
+   * Plugin constructor decorator.
+   *
+   * @var \Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager
    */
   protected $decoratorManager;
 
@@ -35,7 +33,8 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
    *   The entity type repository.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
-   * @param SyncNormalizerDecoratorManager $decorator_manager
+   * @param \Drupal\content_sync\Plugin\SyncNormalizerDecoratorManager $decorator_manager
+   *   Plugin  decorator.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeRepositoryInterface $entity_type_repository, EntityFieldManagerInterface $entity_field_manager, SyncNormalizerDecoratorManager $decorator_manager) {
     parent::__construct($entity_type_manager, $entity_type_repository, $entity_field_manager);
@@ -68,14 +67,14 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
         ->getMainPropertyName() : 'value';
 
       // Normalize the bundle if it is not explicitly set.
-      $bundle = isset($data[$bundle_key][0][$key_id]) ? $data[$bundle_key][0][$key_id] : (isset($data[$bundle_key]) ? $data[$bundle_key] : NULL);
+      $bundle = $data[$bundle_key][0][$key_id] ?? ($data[$bundle_key] ?? NULL);
     }
 
     $context['bundle'] = $bundle;
     // Decorate data before denormalizing it.
     $this->decorateDenormalization($data, $entity_type_id, $format, $context);
 
-    // Data to Entity
+    // Data to Entity.
     $entity = parent::denormalize($data, $class, $format, $context);
 
     // Decorate denormalized entity before retuning it.
@@ -88,7 +87,7 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
    * {@inheritdoc}
    */
   public function normalize($object, $format = NULL, array $context = []): array|\ArrayObject|bool|float|int|NULL|string {
-    /* @var ContentEntityInterface $object */
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $object */
     $normalized_data = parent::normalize($object, $format, $context);
     $normalized_data['_content_sync'] = $this->getContentSyncMetadata($object, $context);
 
@@ -100,24 +99,22 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   public function supportsNormalization($data, ?string $format = NULL, array $context = []): bool {
     return parent::supportsNormalization($data, $format, $context) && !empty($data->is_content_sync);
   }
 
   /**
-   * @inheritdoc
-   */
-  public function supportsDenormalization($data, string $type, ?string $format = NULL, array $context = []): bool {
-    return parent::supportsDenormalization($data, $type, $format, $context);
-  }
-
-  /**
-   * @param $object
+   * The function returns metadata including the entity object.
+   *
+   * @param mixed $object
+   *   Function is typically an object representing some entity in your system.
    * @param array $context
+   *   Function is a protected.
    *
    * @return array
+   *   The value of the entity type ID of the object passed function
    */
   protected function getContentSyncMetadata($object, $context = []) {
     $metadata = [
@@ -127,9 +124,10 @@ class ContentEntityNormalizer extends BaseContentEntityNormalizer {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   protected function getDecoratorManager() {
     return $this->decoratorManager;
   }
+
 }

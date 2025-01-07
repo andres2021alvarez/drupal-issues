@@ -5,12 +5,12 @@
  * Allows site administrators to modify content.
  */
 
-use Drupal\content_sync\Content\ContentDatabaseStorage;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Url;
+use Drupal\content_sync\Content\ContentDatabaseStorage;
 
 /**
  * Implements hook_help().
@@ -65,8 +65,7 @@ function content_sync_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<dd>' . t('You can set specific settings for the content synchronization behavior as ignore the UUID Site validation and more on the <a href=":settings">Settings</a> page.', [':settings' => \Drupal::url('content.settings')]) . '</dd>';
       $output .= '</dl>';
 
-      //return $output;
-
+      // Return $output;.
     case 'content.export_full':
       $output = '';
       $output .= '<p>' . t('Export and download the full content of this site as a gzipped tar file.') . '</p>';
@@ -154,10 +153,10 @@ CONFIG_SYNC_DIRECTORY constant to access the sync directory.
 
 $content_directories;
 Where to declare constant variables
-  //const CONFIG_ACTIVE_DIRECTORY = 'active';
-  //const CONFIG_SYNC_DIRECTORY = 'sync';
-  //const CONFIG_STAGING_DIRECTORY = 'staging';
-*/
+// Const CONFIG_ACTIVE_DIRECTORY = 'active';
+// const CONFIG_SYNC_DIRECTORY = 'sync';
+// const CONFIG_STAGING_DIRECTORY = 'staging';.
+ */
 
 /**
  * Returns the path of a content directory.
@@ -220,9 +219,9 @@ function content_sync_entity_update(EntityInterface $entity) {
     $name = $entity_type . "." . $entity_bundle . "." . $entity->uuid();
     // Insert/Update Data.
     $activeStorage = new ContentDatabaseStorage(\Drupal::database(), 'cs_db_snapshot');
-    $activeStorage->cs_write($name, Yaml::decode($exported_entity), $entity_type . "." . $entity_bundle);
+    $activeStorage->csWrite($name, Yaml::decode($exported_entity), $entity_type . "." . $entity_bundle);
     // Invalidate the CS Cache of the entity.
-    $cache = \Drupal::cache('content')->invalidate($entity_type.".".$entity_bundle.":".$name);
+    $cache = \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
   }
 }
 
@@ -254,8 +253,8 @@ function content_sync_entity_delete(EntityInterface $entity) {
     $name = $entity_type . "." . $entity_bundle . "." . $entity_uuid;
     // Delete Data.
     $activeStorage = new ContentDatabaseStorage(\Drupal::database(), 'cs_db_snapshot');
-    $activeStorage->cs_delete($name);
+    $activeStorage->csDelete($name);
     // Invalidate the CS Cache of the entity.
-    $cache = \Drupal::cache('content')->invalidate($entity_type.".".$entity_bundle.":".$name);
+    $cache = \Drupal::cache('content')->invalidate($entity_type . "." . $entity_bundle . ":" . $name);
   }
 }

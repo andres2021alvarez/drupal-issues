@@ -47,5 +47,3 @@ https://www.drupal.org/u/dabito
 
 David Nova (david4lim)
 https://www.drupal.org/u/david4lim
-
-
