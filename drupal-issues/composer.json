@@ -28,6 +28,7 @@
         "drupal/redirect": "^1.10",
         "drupal/restui": "^1.22",
         "drupal/robotstxt": "^1.6",
+        "drupal/webform_rest": "^4.1",
         "drush/drush": "^13.2",
         "squizlabs/php_codesniffer": "^3.10"
     },
