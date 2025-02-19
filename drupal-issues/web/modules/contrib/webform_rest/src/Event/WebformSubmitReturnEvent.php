@@ -3,7 +3,6 @@
 namespace Drupal\webform_rest\Event;
 
 use Drupal\Component\EventDispatcher\Event;
-use Drupal\rest\ModifiedResourceResponse;
 
 /**
  * Class WebformSubmitReturnEvent, an event to change the return.
@@ -14,21 +13,29 @@ class WebformSubmitReturnEvent extends Event {
   const WEBFORM_SUBMIT_RETURN = 'webform_rest.submit.return';
 
   /**
+   * Stores the return type, success or error.
+   *
    * @var string
    */
   private $type;
 
   /**
+   * Stores the submission values.
+   *
    * @var array
    */
   protected $submissionValues;
 
   /**
+   * Stores the response from the request.
+   *
    * @var array
    */
   protected $returnData;
 
   /**
+   * Stores the HTTP code from the request.
+   *
    * @var int
    */
   protected $httpCode;
@@ -37,9 +44,13 @@ class WebformSubmitReturnEvent extends Event {
    * Construct for injection dependency.
    *
    * @param string $type
+   *   The return type, success or error.
    * @param array $submissionValues
+   *   The submission values.
    * @param array $returnData
+   *   The response from the request.
    * @param int $httpCode
+   *   The HTTP code from the request.
    */
   public function __construct(string $type, array $submissionValues, array &$returnData, int &$httpCode) {
     $this->type = $type;

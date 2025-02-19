@@ -2,11 +2,11 @@
 
 namespace Drupal\webform_rest\Plugin\rest\resource;
 
-use Drupal\webform\WebformSubmissionForm;
-use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ModifiedResourceResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Drupal\rest\Plugin\ResourceBase;
+use Drupal\webform\WebformSubmissionForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Creates a resource for retrieving webform submission data.
@@ -40,7 +40,6 @@ class WebformSubmissionResource extends ResourceBase {
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
-
   protected $currentUser;
 
   /**
@@ -101,10 +100,10 @@ class WebformSubmissionResource extends ResourceBase {
         if (!$webform_submission->access('view', $this->currentUser)) {
           $errors = [
             'error' => [
-              'message' => $this->t('Permisson denied'),
+              'message' => $this->t('Permission denied'),
             ],
           ];
-            return new ModifiedResourceResponse($errors, 400);
+          return new ModifiedResourceResponse($errors, 400);
         }
 
         // Grab submission data.
@@ -120,8 +119,7 @@ class WebformSubmissionResource extends ResourceBase {
       }
     }
 
-    throw new NotFoundHttpException(t("Can't load webform submission."));
-
+    throw new NotFoundHttpException("Can't load webform submission.");
   }
 
   /**
@@ -178,11 +176,11 @@ class WebformSubmissionResource extends ResourceBase {
       // Check webform_id.
       if ($submission_webform_id == $webform_id) {
 
-      // Check if user have permission to update a submission.
+        // Check if user have permission to update a submission.
         if (!$webform_submission->access('update', $this->currentUser)) {
           $errors = [
             'error' => [
-              'message' => $this->t('Permisson denied'),
+              'message' => $this->t('Permission denied'),
             ],
           ];
           return new ModifiedResourceResponse($errors, 400);
@@ -209,7 +207,7 @@ class WebformSubmissionResource extends ResourceBase {
       }
     }
 
-    throw new NotFoundHttpException(t("Can't load webform submission."));
+    throw new NotFoundHttpException("Can't load webform submission.");
   }
 
   /**
@@ -242,23 +240,23 @@ class WebformSubmissionResource extends ResourceBase {
         'error' => [
           'message' => $this->t('Invalid submission UUID.'),
         ],
-       ];
+      ];
       return new ModifiedResourceResponse($errors, 400);
     }
     $webform_submission = reset($webform_submission);
-  
+
     // Check for a submission.
     if (!empty($webform_submission)) {
       $submission_webform_id = $webform_submission->get('webform_id')->getString();
-  
+
       // Check webform_id.
       if ($submission_webform_id == $webform_id) {
-  
+
         // Check user have permission to delete webform submission.
         if (!$webform_submission->access('delete', $this->currentUser)) {
           $errors = [
             'error' => [
-              'message' => $this->t('Permisson denied'),
+              'message' => $this->t('Permission denied'),
             ],
           ];
           return new ModifiedResourceResponse($errors, 400);
@@ -267,9 +265,9 @@ class WebformSubmissionResource extends ResourceBase {
         return new ModifiedResourceResponse(['status' => 1]);
         // The entity  can be deleted.
       }
-     }
-  
-    throw new NotFoundHttpException(t("Can't load webform submission."));
+    }
+
+    throw new NotFoundHttpException("Can't load webform submission.");
   }
 
 }

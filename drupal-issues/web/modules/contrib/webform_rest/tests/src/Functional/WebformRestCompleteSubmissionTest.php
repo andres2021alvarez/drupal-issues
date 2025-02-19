@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\webform_rest\Functional;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Tests\webform\Functional\WebformBrowserTestBase;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Entity\WebformSubmission;
-use Drupal\Component\Serialization\Json;
 
 /**
  * Test the webform rest endpoints for complete submissions.
@@ -47,7 +47,7 @@ class WebformRestCompleteSubmissionTest extends WebformBrowserTestBase {
 
     // Get webform submission and fields.
     $result = $this->drupalGet("/webform_rest/webform_rest_test/complete_submission/$uuid", ['query' => ['_format' => 'hal_json']]);
-    $created_response = Json::decode((string) $result);
+    $created_response = Json::decode($result);
     // debug($result);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('"title":"Test: Webform rest"');

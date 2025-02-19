@@ -2,8 +2,10 @@
 
 namespace Drupal\webform_rest\Plugin\rest\resource;
 
-use Drupal\rest\Plugin\ResourceBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\rest\ModifiedResourceResponse;
+use Drupal\rest\Plugin\ResourceBase;
+use Drupal\rest\Plugin\Type\ResourcePluginManager;
 use Drupal\webform\Entity\Webform;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -23,9 +25,16 @@ class WebformCompleteSubmissionResource extends ResourceBase {
   /**
    * The entity type manager object.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManager
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The resource plugin manager.
+   *
+   * @var \Drupal\rest\Plugin\Type\ResourcePluginManager
+   */
+  protected ResourcePluginManager $resourcePluginManager;
 
   /**
    * {@inheritdoc}
@@ -33,6 +42,7 @@ class WebformCompleteSubmissionResource extends ResourceBase {
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->resourcePluginManager = $container->get('plugin.manager.rest');
     return $instance;
   }
 
@@ -74,7 +84,8 @@ class WebformCompleteSubmissionResource extends ResourceBase {
     $submissionData = $webform_submission->getData();
 
     // Get webform fields/structure from Webform Fields Resource.
-    $webformFieldsResource = new WebformFieldsResource($this->configuration, 'webform_rest_fields', $this->pluginDefinition, $this->serializerFormats, $this->logger);
+    /** @var \Drupal\webform_rest\Plugin\rest\resource\WebformFieldsResource $webformFieldsResource */
+    $webformFieldsResource = $this->resourcePluginManager->createInstance('webform_rest_fields', $this->configuration);
     $fields = $webformFieldsResource->get($webform_id);
     $fieldsData = $fields->getResponseData();
 
@@ -104,8 +115,7 @@ class WebformCompleteSubmissionResource extends ResourceBase {
     foreach ($fields as $k => $v) {
       if (isset($v['#title']) && isset($v['#type'])) {
         $result[$k] = $this->buildResponse($v, $submission);
-        $result[$k]['value'] = isset($submission[$v['#webform_key']]) ?
-            $submission[$v['#webform_key']] : NULL;
+        $result[$k]['value'] = $submission[$v['#webform_key']] ?? NULL;
       }
     }
 

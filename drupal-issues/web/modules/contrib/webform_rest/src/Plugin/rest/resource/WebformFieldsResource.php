@@ -2,12 +2,12 @@
 
 namespace Drupal\webform_rest\Plugin\rest\resource;
 
-use Drupal\webform\Entity\Webform;
-use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ModifiedResourceResponse;
+use Drupal\rest\Plugin\ResourceBase;
+use Drupal\webform\Entity\Webform;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Creates a resource for retrieving webform elements.
@@ -38,7 +38,6 @@ class WebformFieldsResource extends ResourceBase {
     return $instance;
   }
 
-
   /**
    * Responds to GET requests, returns webform elements.
    *
@@ -53,7 +52,7 @@ class WebformFieldsResource extends ResourceBase {
    */
   public function get($webform_id) {
     if (empty($webform_id)) {
-      throw new BadRequestHttpException(t("Webform ID wasn't provided"));
+      throw new BadRequestHttpException("Webform ID wasn't provided");
     }
 
     // Load the webform.
@@ -68,8 +67,7 @@ class WebformFieldsResource extends ResourceBase {
       return new ModifiedResourceResponse($elements);
     }
 
-    throw new NotFoundHttpException(t("Can't load webform."));
-
+    throw new NotFoundHttpException("Can't load webform.");
   }
 
 }

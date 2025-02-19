@@ -2,13 +2,12 @@
 
 namespace Drupal\Tests\webform_rest\Functional;
 
+use Behat\Mink\Driver\BrowserKitDriver;
+use Drupal\Component\Serialization\Json;
+use Drupal\Tests\webform\Functional\WebformBrowserTestBase;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Entity\WebformSubmission;
-use Drupal\Tests\webform\Functional\WebformBrowserTestBase;
-use Drupal\Component\Serialization\Json;
 use GuzzleHttp\RequestOptions;
-use GuzzleHttp\Client;
-use Behat\Mink\Driver\BrowserKitDriver;
 
 /**
  * Test the webform rest endpoints for submissions.
@@ -49,7 +48,7 @@ class WebformRestSubmissionTest extends WebformBrowserTestBase {
     $uuid = $webform_submission->uuid();
 
     // Get webform submission.
-    $result = $this->drupalGet("/webform_rest/webform_rest_test/submission/$uuid", ['query' => ['_format' => 'hal_json']]);
+    $this->drupalGet("/webform_rest/webform_rest_test/submission/$uuid", ['query' => ['_format' => 'hal_json']]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('"data":{"first_name":"John","last_name":"Smith"}');
   }
@@ -58,7 +57,6 @@ class WebformRestSubmissionTest extends WebformBrowserTestBase {
    * Test method POST submission resource.
    */
   public function testWebformRestPostSubmission() {
-    $webform = Webform::load('webform_rest_test');
     $this->drupalLogin($this->rootUser);
     $body = [
       'webform_id' => 'webform_rest_test',
@@ -66,7 +64,6 @@ class WebformRestSubmissionTest extends WebformBrowserTestBase {
       'last_name' => 'Smith',
     ];
 
-    $client = new Client();
     $token = $this->drupalGet("/session/token", ['query' => ['_format' => 'hal_json']]);
     $response = $this->request('POST', $this->baseUrl . '/webform_rest/submit?_format=json', [
       'body' => Json::encode($body),
@@ -100,7 +97,6 @@ class WebformRestSubmissionTest extends WebformBrowserTestBase {
       'last_name' => 'Hopkins',
     ];
 
-    $client = new Client();
     $token = $this->drupalGet("/session/token", ['query' => ['_format' => 'hal_json']]);
     $response = $this->request('PATCH', $this->baseUrl . "/webform_rest/webform_rest_test/submission/$uuid?_format=json", [
       'body' => Json::encode($body),
@@ -116,7 +112,7 @@ class WebformRestSubmissionTest extends WebformBrowserTestBase {
     $this->assertNotEmpty($created_response['sid']);
     $uuid = $created_response['sid'];
     // Get webform submission.
-    $result = $this->drupalGet("/webform_rest/webform_rest_test/submission/$uuid", ['query' => ['_format' => 'hal_json']]);
+    $this->drupalGet("/webform_rest/webform_rest_test/submission/$uuid", ['query' => ['_format' => 'hal_json']]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('"data":{"first_name":"Daniel","last_name":"Hopkins"}');
   }
